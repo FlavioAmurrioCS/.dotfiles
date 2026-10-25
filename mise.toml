@@ -1,0 +1,43 @@
+#:schema https://mise.jdx.dev/schema/mise.json
+
+[vars]
+links = """
+.config/ruff/ruff.toml    ruff.toml
+.config/ty/ty.toml        ty.toml
+.config/shuck/shuck.toml  shuck.toml
+.config/ryl/ryl.toml      .config/ryl.toml
+.config/tombi/config.toml .config/tombi.toml
+"""
+
+[tasks.setup]
+description = "Link configs where each tool's project lookup expects them"
+run = '''
+printf '%s\n' "{{vars.links}}" | while read -r src dst; do
+  [ -z "$src" ] || ln -sfn "{{config_root}}/$src" "{{config_root}}/$dst"
+done
+'''
+
+[tasks.unsetup]
+description = "Delete link configs"
+run = '''
+printf '%s\n' "{{vars.links}}" | while read -r _ dst; do
+  [ -z "$dst" ] || [ ! -L "{{config_root}}/$dst" ] || rm "{{config_root}}/$dst"
+done
+'''
+
+[tasks.stubs]
+description = "Create shell startup files from stubs/, skipping any that exist"
+run = '''
+cd "{{config_root}}/stubs"
+find . -type f | while read -r f; do
+  dst="$HOME/${f#./}"
+  if [ -e "$dst" ] || [ -L "$dst" ]; then continue; fi
+  mkdir -p "$(dirname "$dst")"
+  cp "$f" "$dst"
+  echo "created $dst"
+done
+'''
+
+[settings]
+idiomatic_version_file_enable_tools = ["python"]
+python.uv_venv_auto = "create|source"

@@ -1,0 +1,17 @@
+/ruff.toml
+/ty.toml
+/shuck.toml
+/.config/ryl.toml
+/.config/tombi.toml
+
+.ryl_cache
+.venv
+uv.lock
+.ruff_cache
+.rumdl_cache
+
+# vale sync downloads packages here; only the Vocab is tracked.
+/styles/*
+!/styles/config/
+/styles/config/*
+!/styles/config/vocabularies/

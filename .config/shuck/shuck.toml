@@ -1,0 +1,28 @@
+################################################################################
+# Location Docs: https://github.com/ewhauser/shuck/blob/main/website/content/configuration/index.mdx#config-file-discovery
+# Location User: ~/.config/shuck/shuck.toml
+# Location Repo: ./shuck.toml
+# Location Check: none built in; `shuck check <file>.sh` should apply the rules below
+################################################################################
+# Every rule, like ruff.toml, minus the ones that don't fit shell startup files.
+
+[lint]
+select = [
+  "ALL",
+]
+ignore = [
+  # Google shell style: file header, function doc blocks, TODO owners, a
+  # 100-line cap and a closing call to main().
+  "S080",
+  "S081",
+  "S082",
+  "S083",
+  "S084",
+  "S085",
+  # Want `local` or `readonly` for function and global writes. POSIX sh has
+  # no `local`, and sourced files set globals on purpose.
+  "C158",
+  "C159",
+  # Reports `. "${HOME}/..."` as relative to the current directory.
+  "C160",
+]

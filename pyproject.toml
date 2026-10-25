@@ -1,0 +1,7 @@
+#:schema https://www.schemastore.org/pyproject.json
+
+[project]
+name = "dotfiles"
+version = "0.0.1"
+requires-python = ">=3.11"
+dependencies = []

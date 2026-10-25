@@ -1,0 +1,32 @@
+#:schema https://www.schemastore.org/ruff.json
+################################################################################
+# Location Docs: https://github.com/astral-sh/ruff/blob/main/docs/faq.md#how-can-i-change-ruffs-default-configuration
+# Location User: ~/.config/ruff/ruff.toml
+# Location Repo: ./ruff.toml
+# Location Check: ruff check --show-settings | grep 'Settings path'
+################################################################################
+
+line-length = 100
+
+[lint]
+select = [
+  "ALL",
+]
+ignore = [
+  "COM812",  # missing-trailing-comma
+  "D",  # pydocstyle
+  "ERA001",  # commented-out-code
+  "EXE003",  # shebang-missing-python
+  "ISC001",  # single-line-implicit-string-concatenation
+  "PTH",  # flake8-use-pathlib
+  "T20",  # flake8-print
+  "PLC0415",  # import-outside-top-level
+  "CPY001",  # missing-copyright-notice
+]
+
+[lint.isort]
+force-single-line = true
+
+[format]
+docstring-code-format = true
+docstring-code-line-length = 100

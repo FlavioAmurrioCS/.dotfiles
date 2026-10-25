@@ -1,0 +1,56 @@
+# yaml-language-server: $schema=https://www.schemastore.org/pre-commit-config.json
+---
+# `pre-commit install` also sets up the commit-msg hook (vale-commit-msg).
+default_install_hook_types: [pre-commit, commit-msg]
+repos:
+  - repo: https://github.com/FlavioAmurrioCS/system-hooks
+    rev: v2026.10.24
+    hooks:
+      # - id: mado
+      - id: ruff-check
+      - id: ruff-format
+      - id: ty
+      # - id: pip-compile
+      # - id: uv-audit
+      # - id: uv-export
+      # - id: uv-lock
+      # - id: uv-sync
+      - id: betterleaks
+      # - id: taplo-format
+      # - id: taplo-lint
+      - id: shuck
+      # - id: pyrefly-check
+      # - id: uv-to-pipfile
+      # - id: gitleaks
+      # - id: hadolint
+      # - id: jactionlint
+      - id: ryl-check
+      - id: ryl-check-markdown
+      - id: ryl-format
+      - id: ryl-format-markdown
+      # - id: oxfmt
+      # - id: oxlint
+      # - id: check-added-large-files
+      # - id: check-yaml
+      # - id: end-of-file-fixer
+      # - id: name-tests-test
+      # - id: trailing-whitespace
+      # - id: check-jsonschema
+      # - id: check-metaschema
+      # - id: renovate-config-validator
+      # - id: actionlint
+      - id: rumdl-check
+      - id: rumdl-fmt
+      # - id: shfmt
+      - id: shellcheck
+      - id: ripsecrets
+      # - id: sourcemeta-jsonschema-lint
+      - id: tombi-format
+      - id: tombi-lint
+      # - id: trufflehog
+      - id: vale
+      - id: vale-commit-msg
+      # - id: zizmor
+      # - id: bash-syntax-check
+      # - id: oxfmt-json
+      # - id: oxfmt-yaml

@@ -1,0 +1,10 @@
+#:schema https://www.schemastore.org/ty.json
+################################################################################
+# Location Docs: https://github.com/astral-sh/ty/blob/main/docs/configuration.md#configuration-files
+# Location User: ~/.config/ty/ty.toml
+# Location Repo: ./ty.toml
+# Location Check: ty check -vv 2>&1 | grep -i 'configuration'
+################################################################################
+
+[rules]
+all = "error"

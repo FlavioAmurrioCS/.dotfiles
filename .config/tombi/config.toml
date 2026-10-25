@@ -1,0 +1,16 @@
+#:schema https://www.schemastore.org/tombi.json
+################################################################################
+# Location Docs: https://github.com/tombi-toml/tombi/blob/main/docs/src/routes/docs/configuration.mdx#search-priority
+# Location User: ~/.config/tombi/config.toml
+# Location Repo: ./.config/tombi.toml
+# Location Check: tombi lint -v 2>&1 | grep 'found at'
+################################################################################
+
+[files]
+exclude = ["uv.lock", "mise.lock"]
+
+[lint.rules]
+tables-out-of-order = "off"
+
+[schema]
+strict = false

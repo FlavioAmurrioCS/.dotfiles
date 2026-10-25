@@ -1,0 +1,10 @@
+dotfiles
+fzf
+hushlogin
+nvim
+ryl
+symlink
+tmux
+tombi('s)?
+ty
+zsh('s)?

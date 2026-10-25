@@ -1,0 +1,35 @@
+#:schema https://mise.jdx.dev/schema/mise.json
+################################################################################
+# Location Docs: https://mise.jdx.dev/configuration.html#configuration-hierarchy
+# Location User: ~/.config/mise/conf.d/dotfiles.toml
+# Location Repo: ./.config/mise/conf.d/dotfiles.toml
+# Location Check: mise config ls && mise dot status -v
+################################################################################
+# Sources are absolute: relative ones resolve from the symlink's directory,
+# not from this repo. Lookup details and sources: docs/config-locations.md.
+
+[dotfiles]
+"~/.config/mise/conf.d/dotfiles.toml" = { source = "~/.dotfiles/.config/mise/conf.d/dotfiles.toml" }
+"~/.config/mise/conf.d/tools.toml" = { source = "~/.dotfiles/.config/mise/conf.d/tools.toml" }
+"~/.config/ruff/ruff.toml" = { source = "~/.dotfiles/.config/ruff/ruff.toml" }
+"~/.config/ty/ty.toml" = { source = "~/.dotfiles/.config/ty/ty.toml" }
+"~/.config/tombi/config.toml" = { source = "~/.dotfiles/.config/tombi/config.toml" }
+"~/.config/ryl/ryl.toml" = { source = "~/.dotfiles/.config/ryl/ryl.toml" }
+"~/.config/shuck/shuck.toml" = { source = "~/.dotfiles/.config/shuck/shuck.toml" }
+"~/.config/vale/.vale.ini" = { source = "~/.dotfiles/.config/vale/.vale.ini" }
+"~/.config/tmux/tmux.conf" = { source = "~/.dotfiles/.config/tmux/tmux.conf" }
+"~/.config/git/config" = { source = "~/.dotfiles/.config/git/config" }
+"~/.config/git/ignore" = { source = "~/.dotfiles/.config/git/ignore" }
+"~/.config/nvim" = { source = "~/.dotfiles/.config/nvim" }
+"~/.zshenv" = { source = "~/.dotfiles/.zshenv" }
+"~/.config/shell/dev.sh" = { source = "~/.dotfiles/.config/shell/dev.sh" }
+"~/.config/shell/trace.sh" = { source = "~/.dotfiles/.config/shell/trace.sh" }
+"~/.hushlogin" = { source = "~/.dotfiles/.hushlogin" }
+
+[dotfiles.ryl-macos]
+source = "~/.dotfiles/.config/ryl/ryl.toml"
+variants = [{ os = "macos", target = "~/Library/Application Support/ryl/ryl.toml" }]
+
+[dotfiles.vale-macos]
+source = "~/.dotfiles/.config/vale/.vale.ini"
+variants = [{ os = "macos", target = "~/Library/Application Support/vale/.vale.ini" }]
