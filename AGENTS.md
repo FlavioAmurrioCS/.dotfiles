@@ -8,6 +8,9 @@
   them; see [`archive/README.md`](archive/README.md).
 - Shell startup files are untracked stubs on each machine; edit the templates
   in `stubs/`, which `mise run stubs` copies only when a file is missing.
+- `.vscode/` configures this repo only. Never add it to
+  `.config/mise/conf.d/dotfiles.toml`: `~/.vscode` holds VS Code's installed
+  extensions.
 - Never stage or commit unless the user asks.
 - Don't create or edit the generated repo links (`ruff.toml`,
   `.config/tombi.toml` and so on). Edit `[vars] links` in `mise.toml`, then run
