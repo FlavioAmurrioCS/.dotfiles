@@ -49,6 +49,10 @@ Move what you need from them into the same file in `~/.config/zsh/`.
 - [`.config/shell/trace.sh`](.config/shell/trace.sh) prints a dimmed tree of
   the files an interactive shell sources, with timings in bash 5 and zsh.
   `DOTFILES_TRACE=0` turns it off.
+- Scripts in [`.local/bin/`](.local/bin/) get one link each in `~/.local/bin`
+  (`mode = "symlink-each"`), since that directory also holds mise, uv tools
+  and other installs. Python scripts use a `uv run --script` shebang, and
+  pre-commit runs ruff and ty on them.
 - For a macOS-only link, add an entry with
   `variants = [{ os = "macos", target = "..." }]`. ryl and vale need one,
   because on macOS they ignore `~/.config` unless `XDG_CONFIG_HOME` is set.

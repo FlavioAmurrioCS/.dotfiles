@@ -25,6 +25,8 @@
 "~/.config/shell/dev.sh" = { source = "~/.dotfiles/.config/shell/dev.sh" }
 "~/.config/shell/trace.sh" = { source = "~/.dotfiles/.config/shell/trace.sh" }
 "~/.hushlogin" = { source = "~/.dotfiles/.hushlogin" }
+# One link per script: ~/.local/bin also holds mise, uv tools and other installs.
+"~/.local/bin" = { source = "~/.dotfiles/.local/bin", mode = "symlink-each" }
 
 [dotfiles.ryl-macos]
 source = "~/.dotfiles/.config/ryl/ryl.toml"

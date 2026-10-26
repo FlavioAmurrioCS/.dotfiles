@@ -7,4 +7,5 @@ symlink
 tmux
 tombi('s)?
 ty
+uv
 zsh('s)?

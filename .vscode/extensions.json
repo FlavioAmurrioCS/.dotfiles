@@ -1,11 +1,11 @@
 {
-    "recommendations": [
-        "hverlin.mise-vscode",
-        "charliermarsh.ruff",
-        "astral-sh.ty",
-        "owenlamont.ryl",
-        "timonwong.shellcheck",
-        "tombi-toml.tombi",
-        "chrischinchilla.vale-vscode"
-    ]
+  "recommendations": [
+    "hverlin.mise-vscode",
+    "charliermarsh.ruff",
+    "astral-sh.ty",
+    "owenlamont.ryl",
+    "timonwong.shellcheck",
+    "tombi-toml.tombi",
+    "chrischinchilla.vale-vscode"
+  ]
 }
