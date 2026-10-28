@@ -18,6 +18,7 @@
 "~/.config/shuck/shuck.toml" = { source = "~/.dotfiles/.config/shuck/shuck.toml" }
 "~/.config/vale/.vale.ini" = { source = "~/.dotfiles/.config/vale/.vale.ini" }
 "~/.config/tmux/tmux.conf" = { source = "~/.dotfiles/.config/tmux/tmux.conf" }
+"~/.config/ghostty/config.ghostty" = { source = "~/.dotfiles/.config/ghostty/config.ghostty" }
 "~/.config/git/config" = { source = "~/.dotfiles/.config/git/config" }
 "~/.config/git/ignore" = { source = "~/.dotfiles/.config/git/ignore" }
 "~/.config/nvim" = { source = "~/.dotfiles/.config/nvim" }

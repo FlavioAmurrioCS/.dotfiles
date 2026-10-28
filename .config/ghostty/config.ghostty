@@ -1,0 +1,12 @@
+################################################################################
+# Location Docs: https://ghostty.org/docs/config#file-location
+# Location User: ~/.config/ghostty/config.ghostty (Ghostty and cmux both read it)
+# Location Repo: none (Ghostty has no project-level config)
+# Location Check: ~/Applications/Ghostty.app/Contents/MacOS/ghostty +show-config | grep toggle_quick_terminal
+################################################################################
+# Comments must be on their own line: after a value they become part of it.
+# Ghostty also loads ~/Library/Application Support/com.mitchellh.ghostty/config*
+# after this file, and those win. Keep that directory free of config files.
+
+# Show or hide the quick terminal from any app.
+keybind = global:ctrl+opt+cmd+space=toggle_quick_terminal
