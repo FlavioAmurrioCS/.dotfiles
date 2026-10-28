@@ -276,9 +276,11 @@ with a plain file. So the startup files are owned by each machine:
 - bash reads `~/.bashrc` for `ssh host cmd`, scp and rsync too. In
   non-interactive shells, `dev.sh` only adds `~/.local/bin` and mise's shims
   to `PATH` and sources `~/.secretsrc` and `~/.localrc`, then returns.
-- `export DEV_SH_MISE=shims` in a machine's `.bashrc` or `.zshrc`, before
-  `dev.sh`, skips `mise activate`. Startup on a Raspberry Pi 4 drops from about
-  190 ms to 75 ms, without `uv_venv_auto` or the env vars from mise config.
+- mise uses its shims by default. `,mise-activate` turns on full activation
+  (`uv_venv_auto` and the env vars from mise config) in that shell, at about
+  30 ms on an M3 and 100 ms on a Raspberry Pi 4. Each stub has a commented-out
+  line that runs it on startup. fzf's key bindings load on the first `fzf` or
+  the first Ctrl-R, which then opens fzf's history search.
 - `mise run stubs` copies a template only when the file doesn't exist, and
   never overwrites. `install.sh` runs it.
 - Lines that installers add stay on that machine. Move anything you want everywhere

@@ -316,6 +316,11 @@ if [ "${__DEV_SH_IS_SOURCED__}" = 'true' ]; then
     else
       _bin="$(type -P "${1}")"
     fi
+    # A mise shim stays the same when its tool is upgraded, so key the cache
+    # on the real install path instead.
+    case "${_bin}" in
+    */mise/shims/*) _bin="$(command mise which "${1}" 2>/dev/null)" ;;
+    esac
     [ -n "${_bin}" ] || return 1
     _dir="${XDG_CACHE_HOME:-${HOME}/.cache}/dev.sh/autocomplete"
     _filename="${*}${_bin}"
@@ -335,13 +340,14 @@ if [ "${__DEV_SH_IS_SOURCED__}" = 'true' ]; then
     __trace_end "${*}"
   }
 
-  enable_autocomplete mise activate "${__DEV_SH_CURRENT_SHELL__}" --shims
-  # DEV_SH_MISE=shims, set in a machine's ~/.bashrc or ~/.zshrc before dev.sh,
-  # keeps only the shims. That skips `mise hook-env` at startup and at each
-  # prompt (about 100ms on a Raspberry Pi 4), but also uv_venv_auto and the env
-  # vars from mise config.
-  [ "${DEV_SH_MISE:-}" = 'shims' ] ||
+  # mise's shims by default: tools resolve, with no `mise hook-env` at startup
+  # or at each prompt (about 30ms on an M3, 100ms on a Raspberry Pi 4).
+  # `,mise-activate` turns on full activation in this shell: uv_venv_auto and
+  # the env vars from mise config.
+  export PATH="${MISE_DATA_DIR:-${XDG_DATA_HOME:-${HOME}/.local/share}/mise}/shims:${PATH}"
+  ,mise-activate() {
     enable_autocomplete mise activate "${__DEV_SH_CURRENT_SHELL__}"
+  }
 
   ,cd() {
     __selected="$(_select_project)"
@@ -409,6 +415,18 @@ if [ "${__DEV_SH_IS_SOURCED__}" = 'true' ]; then
     printf '%s\e[1;96m%s[%s\e[1;91m%s%s%s%s\e[1;96m%s]' "${o}" "${c}" "${o}" "${c}" "${branch}" "${dirty}" "${o}" "${c}"
   }
 
+  # fzf's key bindings and completion load on first use, not at startup: the
+  # first `fzf`, or the first Ctrl-R (bound below for each shell).
+  __dev_sh_fzf_load() {
+    unset -f fzf
+    enable_autocomplete fzf "--${__DEV_SH_CURRENT_SHELL__}"
+  }
+  # Inside $(...) or a pipe, as in ,cd, the load would be thrown away.
+  fzf() {
+    [ "${BASH_SUBSHELL:-${ZSH_SUBSHELL:-0}}" -eq 0 ] && __dev_sh_fzf_load
+    command fzf "${@}"
+  }
+
   case "$__DEV_SH_CURRENT_SHELL__" in
   bash)
     export BASH_SILENCE_DEPRECATION_WARNING=1
@@ -465,7 +483,18 @@ if [ "${__DEV_SH_IS_SOURCED__}" = 'true' ]; then
 
       echo "${__PS1_WRAPPER_START}${__PS1_USERNAME}${__PS1_AT}${__PS1_HOSTNAME} ${__PS1_WORKSPACE}${__PS1_WRAPPER_END}${__PS1_GIT}${__PS1_PROMPT}"
     )"
-    enable_autocomplete fzf "--${__DEV_SH_CURRENT_SHELL__}"
+    # Ctrl-R loads fzf, then opens its history search. Loading rebinds Ctrl-R
+    # to fzf's own widget. bash 3.2 binds it differently, so it keeps the
+    # plain history search there until the first `fzf`.
+    if [ "${BASH_VERSINFO[0]}" -ge 4 ]; then
+      __dev_sh_fzf_history() {
+        DOTFILES_TRACE=0 __dev_sh_fzf_load
+        __fzf_history__
+      }
+      bind -m emacs-standard -x '"\C-r": __dev_sh_fzf_history'
+      bind -m vi-command -x '"\C-r": __dev_sh_fzf_history'
+      bind -m vi-insert -x '"\C-r": __dev_sh_fzf_history'
+    fi
     ;;
   zsh)
     # compinit's permission audit (compaudit) is half its cost. Run it only
@@ -487,7 +516,16 @@ if [ "${__DEV_SH_IS_SOURCED__}" = 'true' ]; then
     __PS1_NP_CLOSE='%}'
     # shellcheck disable=SC2025 # zsh marks zero-width codes with %{ %}, not \[ \]
     PS1=$'\n%{\e[0m%}%{\e[1;91m%}[%{\e[1;93m%}%n%{\e[1;92m%}@%{\e[1;94m%}${MACHINE_NAME:-%m} %{\e[1;95m%}%~%{\e[1;91m%}]$(__ps1_git)\n%{\e[0m%}%{\e[1m%}%(!.#.$) %{\e[0m%}'  # shuck: ignore=X049 # zsh-only branch
-    enable_autocomplete fzf "--${__DEV_SH_CURRENT_SHELL__}"
+    # Ctrl-R loads fzf, then opens its history search. Loading rebinds Ctrl-R
+    # to fzf's own widget.
+    __dev_sh_fzf_history() {
+      DOTFILES_TRACE=0 __dev_sh_fzf_load
+      zle fzf-history-widget
+    }
+    zle -N __dev_sh_fzf_history
+    bindkey -M emacs '^R' __dev_sh_fzf_history
+    bindkey -M vicmd '^R' __dev_sh_fzf_history
+    bindkey -M viins '^R' __dev_sh_fzf_history
     ;;
   *)
     PS1="dev.sh: ${__DEV_SH_CURRENT_SHELL__} not supported"

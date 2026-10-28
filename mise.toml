@@ -41,3 +41,4 @@ done
 [settings]
 idiomatic_version_file_enable_tools = ["python"]
 python.uv_venv_auto = "create|source"
+disable_update_warning = true
