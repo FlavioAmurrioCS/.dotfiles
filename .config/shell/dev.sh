@@ -384,8 +384,8 @@ if [ "${__DEV_SH_IS_SOURCED__}" = 'true' ]; then
 
   __dev_sh_posix_setup
   # theme.sh writes the colors straight to /dev/tty, so it needs a terminal.
-  THEME_SH_THEME='atelier-sulphurpool'
-  [ -n "${THEME_SH_THEME}" ] && [ -t 1 ] && command -v theme.sh >/dev/null 2>&1 && theme.sh "${THEME_SH_THEME}"
+  # THEME_SH_THEME='atelier-sulphurpool'
+  # [ -n "${THEME_SH_THEME}" ] && [ -t 1 ] && command -v theme.sh >/dev/null 2>&1 && theme.sh "${THEME_SH_THEME}"
 
   # Git branch and dirty marker for the prompt. Runs once per prompt, with a
   # single git call. Colors sit between __PS1_NP_OPEN and __PS1_NP_CLOSE, which
