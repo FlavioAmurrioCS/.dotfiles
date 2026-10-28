@@ -1,8 +1,11 @@
 dotfiles
+env
 fzf
 hushlogin
+mise('s)?
 nvim
 ryl
+scp
 symlink
 tmux
 tombi('s)?

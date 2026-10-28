@@ -6,6 +6,8 @@ if [ -f "${HOME}/.config/shell/trace.sh" ]; then . "${HOME}/.config/shell/trace.
 else __trace_start() { :; }; __trace_end() { :; }; __trace_note() { :; }; fi
 __trace_start "${ZDOTDIR}/.zshrc"
 
+# Uncomment on slow machines to use mise's shims without `mise activate`.
+# export DEV_SH_MISE=shims
 [ -f "${HOME}/.config/shell/dev.sh" ] && . "${HOME}/.config/shell/dev.sh"
 
 __trace_end "${ZDOTDIR}/.zshrc"

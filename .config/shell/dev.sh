@@ -128,7 +128,13 @@ __dev_sh_posix_setup() {
 
 # sh stops here, before the first line of bash syntax, which sh can't parse.
 # sh reads a sourced file one command at a time, so it never reaches the rest.
-if [ "${__DEV_SH_CURRENT_SHELL__}" = 'sh' ]; then
+# Non-interactive shells stop here too: bash reads ~/.bashrc for
+# `ssh host cmd`, scp and rsync, which need PATH but not the prompt setup.
+__dev_sh_minimal='false'
+[ "${__DEV_SH_CURRENT_SHELL__}" = 'sh' ] && __dev_sh_minimal='true'
+case $- in *i*) ;; *) __dev_sh_minimal='true' ;; esac
+if [ "${__dev_sh_minimal}" = 'true' ]; then
+  unset __dev_sh_minimal
   if [ "${__DEV_SH_IS_SOURCED__}" = 'true' ]; then
     # mise has no sh activation, but its shims are a plain directory.
     export PATH="${MISE_DATA_DIR:-${XDG_DATA_HOME:-${HOME}/.local/share}/mise}/shims:${PATH}"
@@ -136,9 +142,12 @@ if [ "${__DEV_SH_CURRENT_SHELL__}" = 'sh' ]; then
     __trace_end "${__DEV_SH_TRACE_NAME__}"
     return 0
   fi
-  echo "dev.sh: run it with bash: bash ${__DEV_SH_SCRIPT__} [function] [args]" >&2
-  exit 1
+  if [ "${__DEV_SH_CURRENT_SHELL__}" = 'sh' ]; then
+    echo "dev.sh: run it with bash: bash ${__DEV_SH_SCRIPT__} [function] [args]" >&2
+    exit 1
+  fi
 fi
+unset __dev_sh_minimal
 
 ###############################################################################
 # endregion: SHELL DETECTION
@@ -147,10 +156,15 @@ fi
 ###############################################################################
 # region: SCRIPT SETUP DO NOT EDIT
 ###############################################################################
-__DEV_SH_FUNCTION_LIST__=()
-while IFS='' read -r line; do
-  __DEV_SH_FUNCTION_LIST__+=("$line")
-done < <(sed -n 's/^\([^ _][^ ]*\)() {.*/\1/p' "${__DEV_SH_SCRIPT__}")
+# The public functions in this file, for running it as a script and for
+# `dev.sh [tab][tab]`. Built on first use: the sed costs a fork per new shell.
+__dev_sh_function_list() {
+  [ -n "${__DEV_SH_FUNCTION_LIST__+set}" ] && return 0
+  __DEV_SH_FUNCTION_LIST__=()
+  while IFS='' read -r line; do
+    __DEV_SH_FUNCTION_LIST__+=("$line")
+  done < <(sed -n 's/^\([^ _][^ ]*\)() {.*/\1/p' "${__DEV_SH_SCRIPT__}")
+}
 
 ###############################################################################
 # endregion: SCRIPT SETUP DO NOT EDIT
@@ -322,7 +336,12 @@ if [ "${__DEV_SH_IS_SOURCED__}" = 'true' ]; then
   }
 
   enable_autocomplete mise activate "${__DEV_SH_CURRENT_SHELL__}" --shims
-  enable_autocomplete mise activate "${__DEV_SH_CURRENT_SHELL__}"
+  # DEV_SH_MISE=shims, set in a machine's ~/.bashrc or ~/.zshrc before dev.sh,
+  # keeps only the shims. That skips `mise hook-env` at startup and at each
+  # prompt (about 100ms on a Raspberry Pi 4), but also uv_venv_auto and the env
+  # vars from mise config.
+  [ "${DEV_SH_MISE:-}" = 'shims' ] ||
+    enable_autocomplete mise activate "${__DEV_SH_CURRENT_SHELL__}"
 
   ,cd() {
     __selected="$(_select_project)"
@@ -358,8 +377,9 @@ if [ "${__DEV_SH_IS_SOURCED__}" = 'true' ]; then
   }
 
   __dev_sh_posix_setup
+  # theme.sh writes the colors straight to /dev/tty, so it needs a terminal.
   THEME_SH_THEME='atelier-sulphurpool'
-  [ -n "${THEME_SH_THEME}" ] && command -v theme.sh >/dev/null 2>&1 && theme.sh "${THEME_SH_THEME}"
+  [ -n "${THEME_SH_THEME}" ] && [ -t 1 ] && command -v theme.sh >/dev/null 2>&1 && theme.sh "${THEME_SH_THEME}"
 
   # Git branch and dirty marker for the prompt. Runs once per prompt, with a
   # single git call. Colors sit between __PS1_NP_OPEN and __PS1_NP_CLOSE, which
@@ -484,8 +504,15 @@ if [ "${__DEV_SH_IS_SOURCED__}" = 'true' ]; then
   dev.sh() {
     "${__DEV_SH_SCRIPT__}" "${@}"
   }
-  complete -W "${__DEV_SH_FUNCTION_LIST__[*]}" dev.sh
-  complete -W "${__DEV_SH_FUNCTION_LIST__[*]}" ./dev.sh
+  # $2 is the word being completed, in bash and in zsh's bashcompinit.
+  __dev_sh_complete() {
+    __dev_sh_function_list
+    COMPREPLY=()
+    while IFS='' read -r line; do
+      COMPREPLY+=("$line")
+    done < <(compgen -W "${__DEV_SH_FUNCTION_LIST__[*]}" -- "${2}")
+  }
+  complete -F __dev_sh_complete dev.sh ./dev.sh
   __trace_note "dev.sh [tab][tab] for autocomplete"
   __trace_end "${__DEV_SH_TRACE_NAME__}"
   return 0
@@ -512,6 +539,7 @@ hello_world() {
 ###############################################################################
 : File is being executed
 [ "${1}" = 'debug' ] && set -x && shift 1
+__dev_sh_function_list
 
 # shellcheck disable=SC1009
 # shellcheck disable=SC1058

@@ -273,6 +273,12 @@ with a plain file. So the startup files are owned by each machine:
 - Each stub, `.zshenv` and `dev.sh` call `.config/shell/trace.sh`, which prints
   a dimmed tree of the files sourced, with timings in bash 5 and zsh, in
   interactive shells only. `DOTFILES_TRACE=0` turns it off.
+- bash reads `~/.bashrc` for `ssh host cmd`, scp and rsync too. In
+  non-interactive shells, `dev.sh` only adds `~/.local/bin` and mise's shims
+  to `PATH` and sources `~/.secretsrc` and `~/.localrc`, then returns.
+- `export DEV_SH_MISE=shims` in a machine's `.bashrc` or `.zshrc`, before
+  `dev.sh`, skips `mise activate`. Startup on a Raspberry Pi 4 drops from about
+  190 ms to 75 ms, without `uv_venv_auto` or the env vars from mise config.
 - `mise run stubs` copies a template only when the file doesn't exist, and
   never overwrites. `install.sh` runs it.
 - Lines that installers add stay on that machine. Move anything you want everywhere
