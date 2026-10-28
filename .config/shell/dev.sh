@@ -294,19 +294,31 @@ if [ "${__DEV_SH_IS_SOURCED__}" = 'true' ]; then
   # binary path. A new install path (mise installs by version) or a binary
   # newer than the cache (a self-update) regenerates it. The temp file is per
   # process, so shells starting together don't write over each other.
+  # The path lookup skips functions and aliases: once `mise activate` defines a
+  # `mise` function, `command -v mise` prints `mise` instead of a path.
   enable_autocomplete() {
-    command -v "${1}" >/dev/null 2>&1 || return 1
-    _bin="$(command -v "${1}")"
+    if [ "${__DEV_SH_CURRENT_SHELL__}" = 'zsh' ]; then
+      _bin="$(whence -p "${1}")"
+    else
+      _bin="$(type -P "${1}")"
+    fi
+    [ -n "${_bin}" ] || return 1
     _dir="${XDG_CACHE_HOME:-${HOME}/.cache}/dev.sh/autocomplete"
     _filename="${*}${_bin}"
     _filename="${_dir}/${_filename//[ \/]/_}.sh"
+    _note=
     if [ ! -s "${_filename}" ] || [ "${_bin}" -nt "${_filename}" ]; then
+      _note='regenerated'
+    fi
+    __trace_start "${*}" "${_note}"
+    if [ -n "${_note}" ]; then
       [ -d "${_dir}" ] || mkdir -p "${_dir}"
-      "${@}" >"${_filename}.$$" || { rm -f "${_filename}.$$"; return 1; }
+      "${@}" >"${_filename}.$$" || { rm -f "${_filename}.$$"; __trace_end "${*}"; return 1; }
       mv "${_filename}.$$" "${_filename}"
     fi
     # shellcheck disable=SC1090
     . "${_filename}"
+    __trace_end "${*}"
   }
 
   enable_autocomplete mise activate "${__DEV_SH_CURRENT_SHELL__}" --shims
