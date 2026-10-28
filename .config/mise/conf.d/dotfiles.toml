@@ -9,24 +9,27 @@
 # not from this repo. Lookup details and sources: docs/config-locations.md.
 
 [dotfiles]
-"~/.config/mise/conf.d/dotfiles.toml" = { source = "~/.dotfiles/.config/mise/conf.d/dotfiles.toml" }
-"~/.config/mise/conf.d/tools.toml" = { source = "~/.dotfiles/.config/mise/conf.d/tools.toml" }
-"~/.config/ruff/ruff.toml" = { source = "~/.dotfiles/.config/ruff/ruff.toml" }
-"~/.config/ty/ty.toml" = { source = "~/.dotfiles/.config/ty/ty.toml" }
-"~/.config/tombi/config.toml" = { source = "~/.dotfiles/.config/tombi/config.toml" }
-"~/.config/ryl/ryl.toml" = { source = "~/.dotfiles/.config/ryl/ryl.toml" }
-"~/.config/shuck/shuck.toml" = { source = "~/.dotfiles/.config/shuck/shuck.toml" }
-"~/.config/vale/.vale.ini" = { source = "~/.dotfiles/.config/vale/.vale.ini" }
-"~/.config/tmux/tmux.conf" = { source = "~/.dotfiles/.config/tmux/tmux.conf" }
+"~/.config/ghostty/config.ghostty" = { source = "~/.dotfiles/.config/ghostty/config.ghostty" }
+"~/.config/ghostty/themes" = { source = "~/.dotfiles/.config/ghostty/themes" }
 "~/.config/git/config" = { source = "~/.dotfiles/.config/git/config" }
 "~/.config/git/ignore" = { source = "~/.dotfiles/.config/git/ignore" }
+"~/.config/mise/conf.d/dotfiles.toml" = { source = "~/.dotfiles/.config/mise/conf.d/dotfiles.toml" }
+"~/.config/mise/conf.d/tools.toml" = { source = "~/.dotfiles/.config/mise/conf.d/tools.toml" }
 "~/.config/nvim" = { source = "~/.dotfiles/.config/nvim" }
-"~/.zshenv" = { source = "~/.dotfiles/.zshenv" }
+"~/.config/ruff/ruff.toml" = { source = "~/.dotfiles/.config/ruff/ruff.toml" }
+"~/.config/ryl/ryl.toml" = { source = "~/.dotfiles/.config/ryl/ryl.toml" }
 "~/.config/shell/dev.sh" = { source = "~/.dotfiles/.config/shell/dev.sh" }
 "~/.config/shell/trace.sh" = { source = "~/.dotfiles/.config/shell/trace.sh" }
+"~/.config/shuck/shuck.toml" = { source = "~/.dotfiles/.config/shuck/shuck.toml" }
+"~/.config/tmux/tmux.conf" = { source = "~/.dotfiles/.config/tmux/tmux.conf" }
+"~/.config/tombi/config.toml" = { source = "~/.dotfiles/.config/tombi/config.toml" }
+"~/.config/ty/ty.toml" = { source = "~/.dotfiles/.config/ty/ty.toml" }
+"~/.config/vale/.vale.ini" = { source = "~/.dotfiles/.config/vale/.vale.ini" }
+"~/.config/worktrunk/config.toml" = { source = "~/.dotfiles/.config/worktrunk/config.toml" }
 "~/.hushlogin" = { source = "~/.dotfiles/.hushlogin" }
 # One link per script: ~/.local/bin also holds mise, uv tools and other installs.
 "~/.local/bin" = { source = "~/.dotfiles/.local/bin", mode = "symlink-each" }
+"~/.zshenv" = { source = "~/.dotfiles/.zshenv" }
 
 [dotfiles.ryl-macos]
 source = "~/.dotfiles/.config/ryl/ryl.toml"

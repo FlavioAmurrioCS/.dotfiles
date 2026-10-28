@@ -1,5 +1,23 @@
 #:schema https://mise.jdx.dev/schema/mise.json
 
+# Linters for this repo's pre-commit hooks. They install for this repo only.
+# The ty hook runs `uv check`, and uv_venv_auto below needs uv too.
+[tools]
+betterleaks = "1.9.0"
+"github:ewhauser/shuck" = "0.2.7"
+"github:owenlamont/ryl" = "0.27.0"
+pre-commit = "4.7.0"
+# Releases only have macOS and x86_64 Linux binaries; mise skips it elsewhere.
+ripsecrets = { version = "0.1.11", os = ["macos", "linux/x64"] }
+ruff = "0.17.3"
+rumdl = "0.3.2"
+shellcheck = "0.11.0"
+shfmt = "3.14.1"
+tombi = "1.9.8"
+ty = "0.0.95"
+uv = "0.13.6"
+vale = "3.25.1"
+
 [vars]
 links = """
 .config/ruff/ruff.toml    ruff.toml
@@ -41,3 +59,4 @@ done
 [settings]
 idiomatic_version_file_enable_tools = ["python"]
 python.uv_venv_auto = "create|source"
+disable_update_warning = true

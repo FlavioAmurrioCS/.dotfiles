@@ -1,8 +1,15 @@
+[Gg]hostty
+[Ww]orktrunk
+cmux
 dotfiles
+env
 fzf
 hushlogin
+keybind
+mise('s)?
 nvim
 ryl
+scp
 symlink
 tmux
 tombi('s)?
