@@ -8,5 +8,7 @@ else __trace_start() { :; }; __trace_end() { :; }; __trace_note() { :; }; fi
 __trace_start "${HOME}/.bashrc"
 
 [ -f "${HOME}/.config/shell/dev.sh" ] && . "${HOME}/.config/shell/dev.sh"
+# Uncomment to turn on full mise activation (uv_venv_auto, mise env vars).
+# command -v ,mise-activate >/dev/null 2>&1 && ,mise-activate
 
 __trace_end "${HOME}/.bashrc"

@@ -128,7 +128,13 @@ __dev_sh_posix_setup() {
 
 # sh stops here, before the first line of bash syntax, which sh can't parse.
 # sh reads a sourced file one command at a time, so it never reaches the rest.
-if [ "${__DEV_SH_CURRENT_SHELL__}" = 'sh' ]; then
+# Non-interactive shells stop here too: bash reads ~/.bashrc for
+# `ssh host cmd`, scp and rsync, which need PATH but not the prompt setup.
+__dev_sh_minimal='false'
+[ "${__DEV_SH_CURRENT_SHELL__}" = 'sh' ] && __dev_sh_minimal='true'
+case $- in *i*) ;; *) __dev_sh_minimal='true' ;; esac
+if [ "${__dev_sh_minimal}" = 'true' ]; then
+  unset __dev_sh_minimal
   if [ "${__DEV_SH_IS_SOURCED__}" = 'true' ]; then
     # mise has no sh activation, but its shims are a plain directory.
     export PATH="${MISE_DATA_DIR:-${XDG_DATA_HOME:-${HOME}/.local/share}/mise}/shims:${PATH}"
@@ -136,9 +142,12 @@ if [ "${__DEV_SH_CURRENT_SHELL__}" = 'sh' ]; then
     __trace_end "${__DEV_SH_TRACE_NAME__}"
     return 0
   fi
-  echo "dev.sh: run it with bash: bash ${__DEV_SH_SCRIPT__} [function] [args]" >&2
-  exit 1
+  if [ "${__DEV_SH_CURRENT_SHELL__}" = 'sh' ]; then
+    echo "dev.sh: run it with bash: bash ${__DEV_SH_SCRIPT__} [function] [args]" >&2
+    exit 1
+  fi
 fi
+unset __dev_sh_minimal
 
 ###############################################################################
 # endregion: SHELL DETECTION
@@ -147,10 +156,15 @@ fi
 ###############################################################################
 # region: SCRIPT SETUP DO NOT EDIT
 ###############################################################################
-__DEV_SH_FUNCTION_LIST__=()
-while IFS='' read -r line; do
-  __DEV_SH_FUNCTION_LIST__+=("$line")
-done < <(sed -n 's/^\([^ _][^ ]*\)() {.*/\1/p' "${__DEV_SH_SCRIPT__}")
+# The public functions in this file, for running it as a script and for
+# `dev.sh [tab][tab]`. Built on first use: the sed costs a fork per new shell.
+__dev_sh_function_list() {
+  [ -n "${__DEV_SH_FUNCTION_LIST__+set}" ] && return 0
+  __DEV_SH_FUNCTION_LIST__=()
+  while IFS='' read -r line; do
+    __DEV_SH_FUNCTION_LIST__+=("$line")
+  done < <(sed -n 's/^\([^ _][^ ]*\)() {.*/\1/p' "${__DEV_SH_SCRIPT__}")
+}
 
 ###############################################################################
 # endregion: SCRIPT SETUP DO NOT EDIT
@@ -294,23 +308,46 @@ if [ "${__DEV_SH_IS_SOURCED__}" = 'true' ]; then
   # binary path. A new install path (mise installs by version) or a binary
   # newer than the cache (a self-update) regenerates it. The temp file is per
   # process, so shells starting together don't write over each other.
+  # The path lookup skips functions and aliases: once `mise activate` defines a
+  # `mise` function, `command -v mise` prints `mise` instead of a path.
   enable_autocomplete() {
-    command -v "${1}" >/dev/null 2>&1 || return 1
-    _bin="$(command -v "${1}")"
+    if [ "${__DEV_SH_CURRENT_SHELL__}" = 'zsh' ]; then
+      _bin="$(whence -p "${1}")"
+    else
+      _bin="$(type -P "${1}")"
+    fi
+    # A mise shim stays the same when its tool is upgraded, so key the cache
+    # on the real install path instead.
+    case "${_bin}" in
+    */mise/shims/*) _bin="$(command mise which "${1}" 2>/dev/null)" ;;
+    esac
+    [ -n "${_bin}" ] || return 1
     _dir="${XDG_CACHE_HOME:-${HOME}/.cache}/dev.sh/autocomplete"
     _filename="${*}${_bin}"
     _filename="${_dir}/${_filename//[ \/]/_}.sh"
+    _note=
     if [ ! -s "${_filename}" ] || [ "${_bin}" -nt "${_filename}" ]; then
+      _note='regenerated'
+    fi
+    __trace_start "${*}" "${_note}"
+    if [ -n "${_note}" ]; then
       [ -d "${_dir}" ] || mkdir -p "${_dir}"
-      "${@}" >"${_filename}.$$" || { rm -f "${_filename}.$$"; return 1; }
+      "${@}" >"${_filename}.$$" || { rm -f "${_filename}.$$"; __trace_end "${*}"; return 1; }
       mv "${_filename}.$$" "${_filename}"
     fi
     # shellcheck disable=SC1090
     . "${_filename}"
+    __trace_end "${*}"
   }
 
-  enable_autocomplete mise activate "${__DEV_SH_CURRENT_SHELL__}" --shims
-  enable_autocomplete mise activate "${__DEV_SH_CURRENT_SHELL__}"
+  # mise's shims by default: tools resolve, with no `mise hook-env` at startup
+  # or at each prompt (about 30ms on an M3, 100ms on a Raspberry Pi 4).
+  # `,mise-activate` turns on full activation in this shell: uv_venv_auto and
+  # the env vars from mise config.
+  export PATH="${MISE_DATA_DIR:-${XDG_DATA_HOME:-${HOME}/.local/share}/mise}/shims:${PATH}"
+  ,mise-activate() {
+    enable_autocomplete mise activate "${__DEV_SH_CURRENT_SHELL__}"
+  }
 
   ,cd() {
     __selected="$(_select_project)"
@@ -346,8 +383,14 @@ if [ "${__DEV_SH_IS_SOURCED__}" = 'true' ]; then
   }
 
   __dev_sh_posix_setup
+  # theme.sh writes the colors straight to /dev/tty, so it needs a terminal.
+  # It takes about 30ms on a Raspberry Pi 4, so it runs in the background and
+  # the colors change just after the prompt appears. The ( ... & ) subshell
+  # keeps it out of the job table, so the shell prints no job number.
   THEME_SH_THEME='atelier-sulphurpool'
-  [ -n "${THEME_SH_THEME}" ] && command -v theme.sh >/dev/null 2>&1 && theme.sh "${THEME_SH_THEME}"
+  if [ -n "${THEME_SH_THEME}" ] && [ -t 1 ] && command -v theme.sh >/dev/null 2>&1; then
+    (theme.sh "${THEME_SH_THEME}" >/dev/null 2>&1 &)
+  fi
 
   # Git branch and dirty marker for the prompt. Runs once per prompt, with a
   # single git call. Colors sit between __PS1_NP_OPEN and __PS1_NP_CLOSE, which
@@ -375,6 +418,18 @@ if [ "${__DEV_SH_IS_SOURCED__}" = 'true' ]; then
     # zsh would read a % in a branch name as a prompt escape.
     [ "${__DEV_SH_CURRENT_SHELL__}" = 'zsh' ] && branch=${branch//\%/%%}
     printf '%s\e[1;96m%s[%s\e[1;91m%s%s%s%s\e[1;96m%s]' "${o}" "${c}" "${o}" "${c}" "${branch}" "${dirty}" "${o}" "${c}"
+  }
+
+  # fzf's key bindings and completion load on first use, not at startup: the
+  # first `fzf`, or the first Ctrl-R (bound below for each shell).
+  __dev_sh_fzf_load() {
+    unset -f fzf
+    enable_autocomplete fzf "--${__DEV_SH_CURRENT_SHELL__}"
+  }
+  # Inside $(...) or a pipe, as in ,cd, the load would be thrown away.
+  fzf() {
+    [ "${BASH_SUBSHELL:-${ZSH_SUBSHELL:-0}}" -eq 0 ] && __dev_sh_fzf_load
+    command fzf "${@}"
   }
 
   case "$__DEV_SH_CURRENT_SHELL__" in
@@ -433,7 +488,18 @@ if [ "${__DEV_SH_IS_SOURCED__}" = 'true' ]; then
 
       echo "${__PS1_WRAPPER_START}${__PS1_USERNAME}${__PS1_AT}${__PS1_HOSTNAME} ${__PS1_WORKSPACE}${__PS1_WRAPPER_END}${__PS1_GIT}${__PS1_PROMPT}"
     )"
-    enable_autocomplete fzf "--${__DEV_SH_CURRENT_SHELL__}"
+    # Ctrl-R loads fzf, then opens its history search. Loading rebinds Ctrl-R
+    # to fzf's own widget. bash 3.2 binds it differently, so it keeps the
+    # plain history search there until the first `fzf`.
+    if [ "${BASH_VERSINFO[0]}" -ge 4 ]; then
+      __dev_sh_fzf_history() {
+        DOTFILES_TRACE=0 __dev_sh_fzf_load
+        __fzf_history__
+      }
+      bind -m emacs-standard -x '"\C-r": __dev_sh_fzf_history'
+      bind -m vi-command -x '"\C-r": __dev_sh_fzf_history'
+      bind -m vi-insert -x '"\C-r": __dev_sh_fzf_history'
+    fi
     ;;
   zsh)
     # compinit's permission audit (compaudit) is half its cost. Run it only
@@ -455,7 +521,16 @@ if [ "${__DEV_SH_IS_SOURCED__}" = 'true' ]; then
     __PS1_NP_CLOSE='%}'
     # shellcheck disable=SC2025 # zsh marks zero-width codes with %{ %}, not \[ \]
     PS1=$'\n%{\e[0m%}%{\e[1;91m%}[%{\e[1;93m%}%n%{\e[1;92m%}@%{\e[1;94m%}${MACHINE_NAME:-%m} %{\e[1;95m%}%~%{\e[1;91m%}]$(__ps1_git)\n%{\e[0m%}%{\e[1m%}%(!.#.$) %{\e[0m%}'  # shuck: ignore=X049 # zsh-only branch
-    enable_autocomplete fzf "--${__DEV_SH_CURRENT_SHELL__}"
+    # Ctrl-R loads fzf, then opens its history search. Loading rebinds Ctrl-R
+    # to fzf's own widget.
+    __dev_sh_fzf_history() {
+      DOTFILES_TRACE=0 __dev_sh_fzf_load
+      zle fzf-history-widget
+    }
+    zle -N __dev_sh_fzf_history
+    bindkey -M emacs '^R' __dev_sh_fzf_history
+    bindkey -M vicmd '^R' __dev_sh_fzf_history
+    bindkey -M viins '^R' __dev_sh_fzf_history
     ;;
   *)
     PS1="dev.sh: ${__DEV_SH_CURRENT_SHELL__} not supported"
@@ -472,8 +547,15 @@ if [ "${__DEV_SH_IS_SOURCED__}" = 'true' ]; then
   dev.sh() {
     "${__DEV_SH_SCRIPT__}" "${@}"
   }
-  complete -W "${__DEV_SH_FUNCTION_LIST__[*]}" dev.sh
-  complete -W "${__DEV_SH_FUNCTION_LIST__[*]}" ./dev.sh
+  # $2 is the word being completed, in bash and in zsh's bashcompinit.
+  __dev_sh_complete() {
+    __dev_sh_function_list
+    COMPREPLY=()
+    while IFS='' read -r line; do
+      COMPREPLY+=("$line")
+    done < <(compgen -W "${__DEV_SH_FUNCTION_LIST__[*]}" -- "${2}")
+  }
+  complete -F __dev_sh_complete dev.sh ./dev.sh
   __trace_note "dev.sh [tab][tab] for autocomplete"
   __trace_end "${__DEV_SH_TRACE_NAME__}"
   return 0
@@ -500,6 +582,7 @@ hello_world() {
 ###############################################################################
 : File is being executed
 [ "${1}" = 'debug' ] && set -x && shift 1
+__dev_sh_function_list
 
 # shellcheck disable=SC1009
 # shellcheck disable=SC1058

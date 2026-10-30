@@ -43,7 +43,7 @@ repos:
       - id: rumdl-fmt
       # - id: shfmt
       - id: shellcheck
-      - id: ripsecrets
+      - id: mise-ripsecrets
       # - id: sourcemeta-jsonschema-lint
       - id: tombi-format
       - id: tombi-lint

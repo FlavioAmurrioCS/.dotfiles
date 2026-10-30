@@ -16,6 +16,7 @@ the [config-dir] proposal. Checked on macOS on 2026-10-25.
 | ryl   | `<config-dir>/ryl/ryl.toml`        | `.config/ryl.toml` | User is fallback |
 | vale  | `<config-dir>/vale/.vale.ini`      | `.config/vale.ini` | Merges           |
 | tmux  | `~/.config/tmux/tmux.conf`         | No project config  | Loads all found  |
+| ghostty | `~/.config/ghostty/config.ghostty` | No project config | Loads all found |
 | git   | `~/.config/git/config`, `ignore`   | No (`.git/config`) | Merges           |
 | nvim  | `~/.config/nvim/` (directory)      | No (`exrc` only)   | User only        |
 | zsh   | `~/.zshenv` + `$ZDOTDIR/.z*`       | No project config  | Loads all found  |
@@ -181,6 +182,31 @@ Pattern: `~/.config/<tool>/<tool>.conf`.
 - **Docs:** [tmux FILES][tmux-docs]. Source: the [default list][tmux-default]
   and the [loading loop][tmux-load].
 
+## ghostty
+
+Pattern: `~/.config/<tool>/config.<tool>`.
+
+- **User:** `$XDG_CONFIG_HOME/ghostty/config.ghostty`, then `config`, with
+  `XDG_CONFIG_HOME` defaulting to `~/.config` on macOS too. On macOS it then
+  reads `~/Library/Application Support/com.mitchellh.ghostty/config.ghostty`
+  and `config`. `config.ghostty` is the name since 1.2.3; plain `config` still
+  works.
+- **Project:** none.
+- **Combines:** every file that exists is loaded in that order, and later
+  files win. So a file in Application Support overrides this one. On first
+  launch without any config, Ghostty creates a template there. This repo's
+  file now prevents that.
+- **cmux** embeds Ghostty and reads the same files, so this config applies to
+  it too.
+- **This repo:** `.config/ghostty/config.ghostty`, linked to the same path in
+  `~`. No repo link, since there is no project lookup. It replaces the
+  Application Support template, whose one setting (the quick terminal
+  keybind) moved here.
+- **Check:** the CLI is inside the app,
+  `~/Applications/Ghostty.app/Contents/MacOS/ghostty`. `+show-config` prints
+  the loaded settings and `+validate-config` checks them.
+- **Docs:** [file location in the Ghostty docs][ghostty-docs].
+
 ## git
 
 Pattern: `~/.config/<tool>/config` plus sibling files (`ignore`, `attributes`).
@@ -273,6 +299,14 @@ with a plain file. So the startup files are owned by each machine:
 - Each stub, `.zshenv` and `dev.sh` call `.config/shell/trace.sh`, which prints
   a dimmed tree of the files sourced, with timings in bash 5 and zsh, in
   interactive shells only. `DOTFILES_TRACE=0` turns it off.
+- bash reads `~/.bashrc` for `ssh host cmd`, scp and rsync too. In
+  non-interactive shells, `dev.sh` only adds `~/.local/bin` and mise's shims
+  to `PATH` and sources `~/.secretsrc` and `~/.localrc`, then returns.
+- mise uses its shims by default. `,mise-activate` turns on full activation
+  (`uv_venv_auto` and the env vars from mise config) in that shell, at about
+  30 ms on an M3 and 100 ms on a Raspberry Pi 4. Each stub has a commented-out
+  line that runs it on startup. fzf's key bindings load on the first `fzf` or
+  the first Ctrl-R, which then opens fzf's history search.
 - `mise run stubs` copies a template only when the file doesn't exist, and
   never overwrites. `install.sh` runs it.
 - Lines that installers add stay on that machine. Move anything you want everywhere
@@ -295,6 +329,7 @@ with a plain file. So the startup files are owned by each machine:
 [tmux-default]: https://github.com/tmux/tmux/blob/42374342711adfe3d39bb60d0bb9b45240ed5b06/Makefile.am?plain=1#L14
 [tmux-load]: https://github.com/tmux/tmux/blob/92e14631d321c9a34c0b3ac39c7e576c1f4f97bf/cfg.c?plain=1#L113-L114
 [tmux-changes]: https://github.com/tmux/tmux/blob/5a820e63b72f05c121441149c72327aeeb16dfa4/CHANGES?plain=1#L1681-L1682
+[ghostty-docs]: https://github.com/ghostty-org/website/blob/3755ed6e61b250e994d0e46d55f2a11cb0aa482c/docs/config/index.mdx?plain=1#L36-L52
 [git-docs]: https://git-scm.com/docs/git-config/2.50.1#FILES
 [LazyVim starter]: https://github.com/LazyVim/starter/tree/803bc181d7c0d6d5eeba9274d9be49b287294d99
 [nvim-config]: https://github.com/neovim/neovim/blob/779c36969e31080503be2dfccbcc3f999e289606/runtime/doc/starting.txt?plain=1#L465-L472
