@@ -34,9 +34,11 @@ Move what you need from them into the same file in `~/.config/zsh/`.
 - Each config starts with a Location header. It links the tool's docs, gives
   the user and repo paths, and has a `Location Check` command that shows
   whether the tool loaded it.
-- [`.config/mise/conf.d/tools.toml`](.config/mise/conf.d/tools.toml) declares
-  every tool once, linters included, for this repo and, once linked, for every
-  directory. `mise use -g` writes to it.
+- [`.config/mise/conf.d/tools.toml`](.config/mise/conf.d/tools.toml) holds the
+  short list of tools every machine gets, work machines included. This repo's
+  linters are in [`mise.toml`](mise.toml) and install for the repo only.
+  `mise use -g` writes to the untracked `~/.config/mise/config.toml`, for tools
+  on one machine; move a tool to `tools.toml` by hand to share it.
 - Shell startup files (`.bashrc`, `.bash_profile`, `.profile`, and zsh's
   `.zshrc` and `.zprofile`) aren't linked, because installers append to them.
   `mise run stubs` copies each template in [`stubs/`](stubs/) into `~` only if

@@ -1,0 +1,26 @@
+#:schema https://gist.githubusercontent.com/FlavioAmurrioCS/665fa9175d7bdd7cc0fe8ff8afb89e26/raw/worktrunk-config.schema.json
+################################################################################
+# Location Docs: https://worktrunk.dev/config/#user-configuration
+# Location User: ~/.config/worktrunk/config.toml
+# Location Repo: none (the project config, .config/wt.toml, has its own schema)
+# Location Check: wt config show
+################################################################################
+# wt writes here through the symlink (first-run prompts, wt config update), so
+# those edits land in the repo. approvals.toml stays local in the same directory.
+# For every option with its default: wt --config /tmp/wt.toml config create
+
+worktree-path = "{{ repo_path }}/../{{ branch | sanitize }}"
+skip-shell-integration-prompt = true
+
+[post-switch]
+cmux = '''
+export CMUX_QUIET=1
+[ -n "${CMUX_WORKSPACE_ID:-}" ] || exit 0
+D='{{ worktree_path }}'
+T="$(basename "$(dirname "$D")")/$(basename "$D")"
+P=${D#"$HOME"/}
+[ "$P" = "$D" ] || P="~/$P"
+cmux workspace-action --action rename --title "$T" || true
+cmux workspace-action --action set-description --description "{{ branch }}
+$P" || true
+'''

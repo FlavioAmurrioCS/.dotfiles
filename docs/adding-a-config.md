@@ -106,8 +106,10 @@ Start from [`config-header-template.md`](config-header-template.md):
    with `variants = [{ os = "macos", target = "..." }]` when step 2 needs it.
 2. **Repo link:** add the `<repo path> <link path>` pair to `[vars] links` in
    `mise.toml`, and the link path to `.gitignore`.
-3. **Install:** if mise installs the tool, pin it in one place only:
-   `.config/mise/conf.d/tools.toml` (`mise use -g` writes there). Don't pin it in
+3. **Install:** if mise installs the tool, pin it in one place only. Use
+   `.config/mise/conf.d/tools.toml` when every machine needs it, and `mise.toml`
+   when only this repo does, as with linters. Edit these by hand: `mise use -g`
+   writes to the untracked `~/.config/mise/config.toml`. Don't pin it in
    `pyproject.toml` as well.
 4. **Document:** add a section and a summary row to `config-locations.md`.
    Cover the user and project lookup and merge behaviour, and any config-dir
