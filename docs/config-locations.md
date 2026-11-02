@@ -12,6 +12,7 @@ the [config-dir] proposal. Checked on macOS on 2026-10-25.
 | ruff  | `~/.config/ruff/ruff.toml`         | No (root only)     | User is fallback |
 | ty    | `~/.config/ty/ty.toml`             | No (root only)     | Merges           |
 | shuck | `~/.config/shuck/shuck.toml`       | No (root only)     | User is fallback |
+| shfmt | `~/.editorconfig` (EditorConfig) | No (`.editorconfig`) | Merges up to `root` |
 | tombi | `~/.config/tombi/config.toml`      | `.config/tombi.toml` | User is fallback |
 | ryl   | `<config-dir>/ryl/ryl.toml`        | `.config/ryl.toml` | User is fallback |
 | vale  | `<config-dir>/vale/.vale.ini`      | `.config/vale.ini` | Merges           |
@@ -104,6 +105,36 @@ Pattern: `~/.config/<tool>/<tool>.toml`.
 - **This repo:** root `shuck.toml` link to `.config/shuck/shuck.toml`.
 - **Docs:** [shuck config discovery][shuck-docs], [user config lookup][shuck-user].
 - **config-dir:** no open issue found.
+
+## shfmt
+
+Pattern: EditorConfig, `~/.editorconfig`.
+
+- **User:** shfmt has no config file of its own. It reads `.editorconfig`
+  files, walking up from each script's directory until one sets
+  `root = true`. So `~/.editorconfig` applies to scripts anywhere under `~`.
+- **Project:** `.editorconfig` in the project or any parent directory.
+- **Combines:** every file up to the first `root = true` applies, and the
+  closest one decides each setting. Any formatting flag on the command line,
+  such as `-i 2`, turns EditorConfig off for that run.
+- **Sections:** `[*.sh]` globs, plus shfmt's own `[[shell]]`, `[[bash]]` and
+  `[[zsh]]`, which match scripts by shebang or name when they have no
+  extension. Other editors read those as ordinary globs, which match no real
+  files.
+- **Editors:** nvim, VS Code and JetBrains read the same file, so it sets
+  only shell sections.
+- **shuck** doesn't read EditorConfig. `shuck.toml` repeats the settings in
+  `[format]`, but shfmt stays the formatter. In shuck 0.2.7,
+  `switch-case-indent` also splits each one-line case branch over three
+  lines, which `shfmt -ci` doesn't ([ewhauser/shuck#1360]). And a multi-line
+  `$(...)` holding `'"'` inside `${x:-"..."}` gets a stray `}` after it,
+  which changes the value ([ewhauser/shuck#1359]).
+- **This repo:** `.editorconfig` at the root, linked to `~/.editorconfig`.
+  No repo link: the repo root mirrors `~`, so shfmt finds it directly. The
+  `shfmt` pre-commit hook passes only `--write`, so it reads this file too.
+- **Check:** `printf 'case x in\na) :;;\nesac\n' | shfmt --filename ~/t.sh`
+  indents `a)` by 4 spaces when the file is loaded.
+- **Docs:** [shfmt EditorConfig support][shfmt-docs].
 
 ## tombi
 
@@ -364,6 +395,9 @@ with a plain file. So the startup files are owned by each machine:
 [astral-sh/ruff#10493]: https://github.com/astral-sh/ruff/issues/10493
 [ty-docs]: https://github.com/astral-sh/ty/blob/9aaec9ba5896c759e8e93000d0a1dec51f2bae57/docs/configuration.md?plain=1#L32-L36
 [shuck-docs]: https://github.com/ewhauser/shuck/blob/ed4930b2f3483ff9e954ce8725362b1cb14a6a92/website/content/configuration/index.mdx?plain=1#L34-L43
+[ewhauser/shuck#1359]: https://github.com/ewhauser/shuck/issues/1359
+[ewhauser/shuck#1360]: https://github.com/ewhauser/shuck/issues/1360
+[shfmt-docs]: https://github.com/mvdan/sh/blob/a3f0c75d21d918756fa38de8b5d3429efde7948b/cmd/shfmt/shfmt.1.scd?plain=1#L19-L21
 [shuck-user]: https://github.com/ewhauser/shuck/blob/ed4930b2f3483ff9e954ce8725362b1cb14a6a92/crates/shuck-config/src/lib.rs#L2512-L2534
 [tombi-docs]: https://github.com/tombi-toml/tombi/blob/8630efc37d2d9fcac2114fc58b6f9c56fc12b265/docs/src/routes/docs/configuration.mdx?plain=1#L10-L27
 [ryl-docs]: https://ryl-docs.pages.dev/getting-started/migrating-from-yamllint/#ryl-native-user-global-config

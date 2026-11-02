@@ -16,6 +16,10 @@
   "[toml]": {
     "editor.defaultFormatter": "tombi-toml.tombi"
   },
+  // shfmt reads .editorconfig; shuck's formatter differs (see shuck.toml).
+  "[shellscript]": {
+    "editor.defaultFormatter": "mkhl.shfmt"
+  },
   // The ty extension provides the language server, so turn off Pylance's.
   "python.languageServer": "None"
 }

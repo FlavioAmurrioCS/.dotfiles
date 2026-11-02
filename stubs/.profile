@@ -4,8 +4,13 @@
 # Move anything worth keeping into ~/.config/shell/dev.sh or ~/.localrc.
 # Read by sh login shells, and by bash only when .bash_profile is missing.
 # shellcheck source=/dev/null
-if [ -f "${HOME}/.config/shell/trace.sh" ]; then . "${HOME}/.config/shell/trace.sh"
-else __trace_start() { :; }; __trace_end() { :; }; __trace_note() { :; }; fi
+if [ -f "${HOME}/.config/shell/trace.sh" ]; then
+    . "${HOME}/.config/shell/trace.sh"
+else
+    __trace_start() { :; }
+    __trace_end() { :; }
+    __trace_note() { :; }
+fi
 __trace_start "${HOME}/.profile"
 
 [ -f "${HOME}/.config/shell/dev.sh" ] && . "${HOME}/.config/shell/dev.sh"
