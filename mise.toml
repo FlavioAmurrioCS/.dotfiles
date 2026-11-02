@@ -23,6 +23,7 @@ links = """
 .config/ruff/ruff.toml    ruff.toml
 .config/ty/ty.toml        ty.toml
 .config/shuck/shuck.toml  shuck.toml
+.config/shellcheckrc      shellcheckrc
 .config/ryl/ryl.toml      .config/ryl.toml
 .config/tombi/config.toml .config/tombi.toml
 """

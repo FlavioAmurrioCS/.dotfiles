@@ -2,7 +2,7 @@
 # fzf picker over Ghostty's themes; recolors the terminal live as you move.
 set -euo pipefail
 # resolve the symlink so the edit below lands in the dotfiles copy
-cfg=$(readlink -f "$HOME/.config/ghostty/config.ghostty")
+cfg=$(readlink -f "${HOME}/.config/ghostty/config.ghostty")
 
 if [[ ${1:-} == --apply ]]; then
     awk -F' *= *' '
@@ -17,9 +17,9 @@ fi
 # Ghostty puts its CLI on PATH only in its own windows.
 ghostty=ghostty
 if ! command -v ghostty >/dev/null; then
-    for app in "$HOME/Applications" /Applications; do
-        if [[ -x $app/Ghostty.app/Contents/MacOS/ghostty ]]; then
-            ghostty=$app/Ghostty.app/Contents/MacOS/ghostty
+    for app in "${HOME}/Applications" /Applications; do
+        if [[ -x ${app}/Ghostty.app/Contents/MacOS/ghostty ]]; then
+            ghostty=${app}/Ghostty.app/Contents/MacOS/ghostty
             break
         fi
     done
@@ -29,7 +29,7 @@ reset() { printf '\033]104\007\033]110\007\033]111\007\033]112\007' >/dev/tty; }
 
 # The preview runs in fzf's shell, so its $i must stay unexpanded here.
 # shellcheck disable=SC2016
-choice=$("$ghostty" +list-themes --plain --path --color="${1:-dark}" |
+choice=$("${ghostty}" +list-themes --plain --path --color="${1:-dark}" |
     sed -E 's/^(.*) \((resources|user)\) (.*)$/\1\t\3/' |
     fzf --delimiter '\t' --with-nth 1 \
         --bind "focus:execute-silent('$0' --apply {2})" \
@@ -41,12 +41,12 @@ choice=$("$ghostty" +list-themes --plain --path --color="${1:-dark}" |
 
 name=${choice%%$'\t'*}
 reset
-if grep -q '^theme *=' "$cfg"; then
+if grep -q '^theme *=' "${cfg}"; then
     # awk instead of sed -i, which takes different arguments on macOS and Linux.
     # ENVIRON keeps names such as "Jack O' Lantern" literal.
-    updated=$(NAME=$name awk '/^theme *=/ { print "theme = " ENVIRON["NAME"]; next } 1' "$cfg")
-    printf '%s\n' "$updated" >"$cfg"
+    updated=$(NAME=${name} awk '/^theme *=/ { print "theme = " ENVIRON["NAME"]; next } 1' "${cfg}")
+    printf '%s\n' "${updated}" >"${cfg}"
 else
-    printf 'theme = %s\n' "$name" >>"$cfg"
+    printf 'theme = %s\n' "${name}" >>"${cfg}"
 fi
-echo "theme = $name  → reload Ghostty config with Cmd+Shift+,"
+echo "theme = ${name}  → reload Ghostty config with Cmd+Shift+,"
