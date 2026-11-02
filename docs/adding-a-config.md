@@ -116,6 +116,11 @@ Start from [`config-header-template.md`](config-header-template.md):
    issue in the tool's tracker. Link the docs at a fixed commit, since the
    section records what was true on that date.
 5. **Lint:** if the tool is a linter, add its hook to `.pre-commit-config.yaml`.
+6. **Highlighting:** when the file name has no well-known extension, check
+   that GitHub, VS Code and Neovim recognise it. If one doesn't, map it in
+   `.gitattributes` (`linguist-language`), in `files.associations` in
+   `.vscode/settings.json`, or with `vim.filetype.add` in
+   `.config/nvim/lua/config/options.lua`.
 
 ## 5. Verify
 
@@ -146,6 +151,7 @@ Start from [`config-header-template.md`](config-header-template.md):
 - [ ] Pinned the tool in one place.
 - [ ] Documented it in `config-locations.md`.
 - [ ] Added a pre-commit hook if it's a linter.
+- [ ] Checked highlighting on GitHub, in VS Code and in Neovim.
 - [ ] `mise dot status -v`, `Location Check` and pre-commit all pass.
 
 [config-dir]: https://github.com/pi0/config-dir
