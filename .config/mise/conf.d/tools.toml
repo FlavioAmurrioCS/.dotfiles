@@ -11,6 +11,10 @@
 
 [settings]
 pin = true
+# packslip (the registry default for worktrunk) also installs the agent skills
+# a tool declares, and on a fresh home that fails the whole `mise install`.
+# mise falls back to the next backend in the registry (aqua for worktrunk).
+disable_backends = ["packslip"]
 
 [tools]
 fd = "10.5.0"

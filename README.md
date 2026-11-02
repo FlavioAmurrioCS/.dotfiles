@@ -5,14 +5,44 @@ allows it.
 
 ## Install
 
+Pick one. Each needs only `git`, `curl` and `bash`.
+
+Download and run the script, which clones to `~/.dotfiles`:
+
+<!-- rumdl-disable MD013 -->
 ```sh
-bash install.sh
+curl -fsSL https://raw.githubusercontent.com/FlavioAmurrioCS/.dotfiles/main/install.sh | bash
+```
+<!-- rumdl-enable MD013 -->
+
+Clone first, then run the script from the clone:
+
+```sh
+git clone https://github.com/FlavioAmurrioCS/.dotfiles.git ~/.dotfiles
+~/.dotfiles/install.sh
 ```
 
-The script installs mise, clones this repo to `~/.dotfiles`, and links
-`.config/mise/conf.d/dotfiles.toml` into `~/.config/mise/conf.d/`. Then it runs
+On Coder, clone into `/workspace` instead, and rerun the script after each
+restart:
+
+```sh
+git clone https://github.com/FlavioAmurrioCS/.dotfiles.git /workspace/.dotfiles
+/workspace/.dotfiles/install.sh
+```
+
+To pass `--backup` (see below) to the piped script, use
+`curl -fsSL <url> | bash -s -- --backup`.
+
+The script installs mise, clones this repo to `~/.dotfiles` (or uses the clone
+it runs from), and links `.config/mise/conf.d/dotfiles.toml` into
+`~/.config/mise/conf.d/`. Then it runs
 `mise dotfiles apply`, `mise install`, `vale sync`, `mise run setup` and
 `mise run stubs`. Re-running it is safe.
+
+Every link goes through `~/.dotfiles`. Run from a clone elsewhere, such as
+`/workspace/.dotfiles` on Coder, where a restart resets everything outside
+`/workspace`, the script links `~/.dotfiles` to that clone. If `~/.dotfiles`
+already exists and is a different folder, it stops.
 
 mise won't replace an existing file or folder with a link, so on a machine
 with its own configs the install stops at `mise dotfiles apply`. Run
