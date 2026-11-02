@@ -1,0 +1,13 @@
+################################################################################
+# Location Docs: https://github.com/koalaman/shellcheck/blob/master/shellcheck.1.md#rc-files
+# Location User: ~/.config/shellcheckrc
+# Location Repo: ./shellcheckrc
+# Location Check: none built in; printf 'x=1; echo "$x"\n' | shellcheck -s sh - (reports SC2250 when loaded)
+################################################################################
+# ShellCheck reads only the first rc file it finds, walking up from each
+# script, so a project's own .shellcheckrc replaces this one.
+
+# Write ${var}, not $var (SC2250). Fix existing files with
+# `shellcheck -o require-variable-braces -f diff FILE | git apply`; shfmt
+# doesn't. shuck's S101 is the same rule, but 0.2.7 doesn't have it yet.
+enable=require-variable-braces

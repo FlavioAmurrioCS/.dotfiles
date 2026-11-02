@@ -1,6 +1,7 @@
 /ruff.toml
 /ty.toml
 /shuck.toml
+/shellcheckrc
 /.config/ryl.toml
 /.config/tombi.toml
 

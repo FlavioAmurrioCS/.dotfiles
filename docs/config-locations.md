@@ -13,6 +13,7 @@ the [config-dir] proposal. Checked on macOS on 2026-10-25.
 | ty    | `~/.config/ty/ty.toml`             | No (root only)     | Merges           |
 | shuck | `~/.config/shuck/shuck.toml`       | No (root only)     | User is fallback |
 | shfmt | `~/.editorconfig` (EditorConfig) | No (`.editorconfig`) | Merges up to `root` |
+| ShellCheck | `~/.config/shellcheckrc`    | No (`.shellcheckrc`, upward) | First found |
 | tombi | `~/.config/tombi/config.toml`      | `.config/tombi.toml` | User is fallback |
 | ryl   | `<config-dir>/ryl/ryl.toml`        | `.config/ryl.toml` | User is fallback |
 | vale  | `<config-dir>/vale/.vale.ini`      | `.config/vale.ini` | Merges           |
@@ -135,6 +136,37 @@ Pattern: EditorConfig, `~/.editorconfig`.
 - **Check:** `printf 'case x in\na) :;;\nesac\n' | shfmt --filename ~/t.sh`
   indents `a)` by 4 spaces when the file is loaded.
 - **Docs:** [shfmt EditorConfig support][shfmt-docs].
+
+## ShellCheck
+
+Pattern: `~/.config/shellcheckrc`, a file directly in `~/.config`.
+
+- **User:** `~/.shellcheckrc`, then `$XDG_CONFIG_HOME/shellcheckrc`. With
+  `XDG_CONFIG_HOME` unset, macOS reads `~/.config/shellcheckrc` (tested).
+- **Project:** `.shellcheckrc` or `shellcheckrc` in the script's directory or
+  any parent. Standard input searches from the current directory.
+- **Combines:** none. ShellCheck reads only the first file it finds, and the
+  user file only when no project file exists. `--norc` skips them all, and
+  `--rcfile` names one.
+- **Walking up also finds `shellcheckrc`:** scripts under `~/.config/` find
+  `~/.config/shellcheckrc` before the user lookup runs, and scripts under this
+  repo's `.config/` find `.config/shellcheckrc`. The walk starts from the
+  script's real path, so a linked script such as `~/.config/shell/dev.sh`
+  starts from its file in this repo.
+- **This repo:** root `shellcheckrc` link to `.config/shellcheckrc`, for
+  scripts outside `.config/`. The `shellcheck` pre-commit hook and the VS Code
+  extension read it.
+- **Rules:** `enable=require-variable-braces` (SC2250) wants `${var}`, not
+  `$var`. `shellcheck -f diff FILE | git apply` fixes existing files. shuck
+  plans the same rule as S101, but 0.2.7 doesn't have it, and shfmt has no
+  such option.
+- **Check:** `printf 'x=1; echo "$x"\n' | shellcheck -s sh -` reports
+  SC2250 when the file is loaded.
+- **Unreleased:** ShellCheck's `master` also reads `shellcheck.*` keys from
+  `.editorconfig` files and adds them to `shellcheckrc`'s directives.
+  `shellcheckrc` takes precedence on conflicts. Once released, the rule could
+  move to `~/.editorconfig`, which merges instead of being replaced.
+- **Docs:** [ShellCheck RC files][shellcheck-docs].
 
 ## tombi
 
@@ -400,6 +432,7 @@ with a plain file. So the startup files are owned by each machine:
 [shuck-docs]: https://github.com/ewhauser/shuck/blob/ed4930b2f3483ff9e954ce8725362b1cb14a6a92/website/content/configuration/index.mdx?plain=1#L34-L43
 [ewhauser/shuck#1359]: https://github.com/ewhauser/shuck/issues/1359
 [ewhauser/shuck#1360]: https://github.com/ewhauser/shuck/issues/1360
+[shellcheck-docs]: https://github.com/koalaman/shellcheck/blob/aac0823e6b58f8a499e856e93738082691cbf212/shellcheck.1.md?plain=1#L291-L328
 [shfmt-docs]: https://github.com/mvdan/sh/blob/a3f0c75d21d918756fa38de8b5d3429efde7948b/cmd/shfmt/shfmt.1.scd?plain=1#L19-L21
 [shuck-user]: https://github.com/ewhauser/shuck/blob/ed4930b2f3483ff9e954ce8725362b1cb14a6a92/crates/shuck-config/src/lib.rs#L2512-L2534
 [tombi-docs]: https://github.com/tombi-toml/tombi/blob/8630efc37d2d9fcac2114fc58b6f9c56fc12b265/docs/src/routes/docs/configuration.mdx?plain=1#L10-L27

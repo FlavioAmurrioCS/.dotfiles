@@ -20,6 +20,7 @@
 "~/.config/ryl/ryl.toml" = { source = "~/.dotfiles/.config/ryl/ryl.toml" }
 "~/.config/shell/dev.sh" = { source = "~/.dotfiles/.config/shell/dev.sh" }
 "~/.config/shell/trace.sh" = { source = "~/.dotfiles/.config/shell/trace.sh" }
+"~/.config/shellcheckrc" = { source = "~/.dotfiles/.config/shellcheckrc" }
 "~/.config/shuck/shuck.toml" = { source = "~/.dotfiles/.config/shuck/shuck.toml" }
 "~/.config/tmux/tmux.conf" = { source = "~/.dotfiles/.config/tmux/tmux.conf" }
 "~/.config/tombi/config.toml" = { source = "~/.dotfiles/.config/tombi/config.toml" }

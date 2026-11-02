@@ -179,7 +179,7 @@ __dev_sh_function_list() {
     [ -n "${__DEV_SH_FUNCTION_LIST__+set}" ] && return 0
     __DEV_SH_FUNCTION_LIST__=()
     while IFS='' read -r line; do
-        __DEV_SH_FUNCTION_LIST__+=("$line")
+        __DEV_SH_FUNCTION_LIST__+=("${line}")
     done < <(sed -n 's/^\([^ _][^ ]*\)() {.*/\1/p' "${__DEV_SH_SCRIPT__}")
 }
 
@@ -466,7 +466,7 @@ if [ "${__DEV_SH_IS_SOURCED__}" = 'true' ]; then
         wt "${@}"
     }
 
-    case "$__DEV_SH_CURRENT_SHELL__" in
+    case "${__DEV_SH_CURRENT_SHELL__}" in
         bash)
             export BASH_SILENCE_DEPRECATION_WARNING=1
 
@@ -549,7 +549,7 @@ if [ "${__DEV_SH_IS_SOURCED__}" = 'true' ]; then
             if [ -n "${__dev_sh_dump[*]}" ]; then
                 compinit -C
             else
-                compinit && touch "${ZDOTDIR:-$HOME}/.zcompdump"
+                compinit && touch "${ZDOTDIR:-${HOME}}/.zcompdump"
             fi
             unset __dev_sh_dump
             autoload -U +X bashcompinit && bashcompinit
@@ -591,7 +591,7 @@ if [ "${__DEV_SH_IS_SOURCED__}" = 'true' ]; then
         __dev_sh_function_list
         COMPREPLY=()
         while IFS='' read -r line; do
-            COMPREPLY+=("$line")
+            COMPREPLY+=("${line}")
         done < <(compgen -W "${__DEV_SH_FUNCTION_LIST__[*]}" -- "${2}")
     }
     complete -F __dev_sh_complete dev.sh ./dev.sh
