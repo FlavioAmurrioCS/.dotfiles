@@ -383,7 +383,9 @@ with a plain file. So the startup files are owned by each machine:
   line that runs it on startup. fzf's key bindings load on the first `fzf` or
   the first Ctrl-R, which then opens fzf's history search.
 - `mise run stubs` copies a template only when the file doesn't exist, and
-  never overwrites. `install.sh` runs it.
+  never overwrites. `install.sh` runs it. `install.sh --backup` first moves
+  each startup file that differs from its template into
+  `~/.dotfiles-backup/<timestamp>/`. The templates then take its place.
 - Lines that installers add stay on that machine. Move anything you want everywhere
   into the shared shell code, or into the untracked `~/.localrc` when it's
   machine-specific.
