@@ -194,15 +194,16 @@ __dev_sh_function_list() {
 # Without arguments, LIST_PROJECTS_DEPTH (default 4) and the colon-separated
 # LIST_PROJECTS_DIRS (default ~/dev:~/worktrees) apply.
 # Repos at ~/dev/<host>/<owner>/<repo> and worktrees at
-# ~/worktrees/<owner>/<repo>/<branch>. Bare repos have no .git, so they're left
-# out. Depth 4 keeps the search out of each repo's own files, which is most of
-# the time, and leaves out nested repos such as submodules and SwiftPM checkouts.
-# --no-ignore-vcs: a repo's own .gitignore can match .git (busybox's has .*).
-# A missing root is skipped, and its error hidden. -H: find follows a root
-# that is a symlink, as fd does.
+# ~/worktrees/<owner>/<repo>/<branch>. A folder with a .git (folder or file)
+# is printed and not searched, so nested repos such as submodules and SwiftPM
+# checkouts are left out. Bare repos have no .git. Hidden folders are skipped.
+# The walk is breadth first, a level at a time, with no subprocess. Only bash
+# and zsh get here: sh stops at the minimal setup above.
 _list_projects() {
-    local depth="${1:-${LIST_PROJECTS_DEPTH:-4}}" dirs dir
+    local depth="${1:-${LIST_PROJECTS_DEPTH:-4}}" level=0 dirs dir child
+    local -a queue next
     [ "$#" -gt 0 ] && shift
+    [ -n "${ZSH_VERSION:-}" ] && setopt local_options null_glob
     if [ "$#" -eq 0 ]; then
         # Split on colons into the positional parameters: zsh doesn't word-split.
         dirs="${LIST_PROJECTS_DIRS:-${HOME}/dev:${HOME}/worktrees}:"
@@ -216,12 +217,22 @@ _list_projects() {
             set -- "$@" "${dir}"
         done
     fi
-    if command -v fd >/dev/null 2>&1; then
-        fd '^\.git$' --hidden --no-ignore-vcs --color=never --prune \
-            --maxdepth="${depth}" --format '{//}' "$@" 2>/dev/null
-    else
-        find -H "$@" -maxdepth "${depth}" -name .git -prune -exec dirname {} \; 2>/dev/null
-    fi
+    queue=("$@")
+    while ((${#queue[@]} > 0 && level < depth)); do
+        level=$((level + 1))
+        next=()
+        for dir in "${queue[@]}"; do
+            if [[ -e "${dir}/.git" ]]; then
+                printf '%s\n' "${dir%/}"
+            elif ((level < depth)); then
+                # Without null_glob, bash keeps an unmatched pattern; -d drops it.
+                for child in "${dir%/}"/*/; do
+                    [[ -d "${child}" ]] && next+=("${child%/}")
+                done
+            fi
+        done
+        queue=("${next[@]}")
+    done
 }
 
 _select_project() {
