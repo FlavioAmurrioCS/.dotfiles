@@ -285,7 +285,8 @@ Pattern: `~/.config/<tool>/config` plus sibling files (`ignore`, `attributes`).
 - **User:** `$XDG_CONFIG_HOME/git/config` (default `~/.config/git/config`),
   then `~/.gitconfig`. Both are read and `~/.gitconfig` wins, and
   `git config --global` writes to `~/.gitconfig` whenever it exists. Keep it
-  out of `~`. `ignore` and `attributes` in the same directory are the defaults
+  out of `~`: `install.sh` warns about it, and `install.sh --backup` moves it
+  aside. `ignore` and `attributes` in the same directory are the defaults
   for `core.excludesFile` and `core.attributesFile`.
 - **Project:** none in the sense used here. Each repo has its own
   `.git/config`, plus `.gitignore` and `.gitattributes` files.

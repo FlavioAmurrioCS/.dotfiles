@@ -16,11 +16,6 @@ for arg in "$@"; do
     esac
 done
 
-if ((BACKUP)) && ! command -v jq >/dev/null 2>&1; then
-    echo "error: --backup needs jq" >&2
-    exit 1
-fi
-
 # Move a path under ~ into the backup folder, at the same path relative to ~.
 backup() {
     local rel="${1#"$HOME"/}"
@@ -32,8 +27,9 @@ backup() {
 # mise refuses to replace real files and folders, but replaces wrong symlinks.
 backup_dotfiles() {
     local mode target source rel
+    # A jq on PATH may be a mise shim with no version set, so always pin one.
     mise dot status --json |
-        jq -r '.files[] | select(.state == "differs")
+        mise x jq@1.8.2 -- jq -r '.files[] | select(.state == "differs")
             | [.mode, (.target | sub("^~/"; env.HOME + "/")), .origin.source] | @tsv' |
         while IFS=$'\t' read -r mode target source; do
             case "$mode" in
@@ -61,6 +57,15 @@ backup_stubs() {
     done
 }
 
+# zsh skips these once ~/.zshenv sets ZDOTDIR, and ~/.gitconfig overrides
+# ~/.config/git/config.
+backup_shadowing() {
+    local f
+    for f in .gitconfig .zshrc .zprofile .zlogin .zlogout; do
+        if [[ -e "$HOME/$f" || -L "$HOME/$f" ]]; then backup "$HOME/$f"; fi
+    done
+}
+
 if ! command -v mise >/dev/null 2>&1; then
     curl -fsSL https://mise.run | sh
     export PATH="$HOME/.local/bin:$PATH"
@@ -79,6 +84,7 @@ mise trust "$DOTFILES"
 if ((BACKUP)); then
     backup_dotfiles
     backup_stubs
+    backup_shadowing
 fi
 mise dotfiles apply --yes
 mise -C "$DOTFILES" install
@@ -90,10 +96,13 @@ mise -C "$DOTFILES" run stubs
 
 # ~/.zshenv sets ZDOTDIR=~/.config/zsh, so zsh no longer reads these from ~.
 for f in .zshrc .zprofile .zlogin .zlogout; do
-    if [[ -f "$HOME/$f" && ! -L "$HOME/$f" ]]; then
+    if [[ -e "$HOME/$f" || -L "$HOME/$f" ]]; then
         echo "warning: zsh now skips ~/$f; move what you need into ~/.config/zsh/$f" >&2
     fi
 done
+if [[ -e "$HOME/.gitconfig" || -L "$HOME/.gitconfig" ]]; then
+    echo "warning: ~/.gitconfig overrides ~/.config/git/config; move what you need into ~/.config/git/config.local" >&2
+fi
 
 if [[ -d "$BACKUP_DIR" ]]; then
     echo "Backed up existing files to $BACKUP_DIR"
