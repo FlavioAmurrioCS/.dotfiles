@@ -190,8 +190,42 @@ __dev_sh_function_list() {
 ###############################################################################
 # region: FUNCTIONS THAT ARE COMMON FOR BOTH SOURCED AND EXECUTED
 ###############################################################################
+# Usage: _list_projects [depth [dir...]]
+# Without arguments, LIST_PROJECTS_DEPTH (default 4) and the colon-separated
+# LIST_PROJECTS_DIRS (default ~/dev:~/worktrees) apply.
+# Repos at ~/dev/<host>/<owner>/<repo> and worktrees at
+# ~/worktrees/<owner>/<repo>/<branch>. Bare repos have no .git, so they're left
+# out. Depth 4 keeps the search out of each repo's own files, which is most of
+# the time, and leaves out nested repos such as submodules and SwiftPM checkouts.
+# --no-ignore-vcs: a repo's own .gitignore can match .git (busybox's has .*).
+# A missing root is skipped, and its error hidden. -H: find follows a root
+# that is a symlink, as fd does.
+_list_projects() {
+    local depth="${1:-${LIST_PROJECTS_DEPTH:-4}}" dirs dir
+    [ "$#" -gt 0 ] && shift
+    if [ "$#" -eq 0 ]; then
+        # Split on colons into the positional parameters: zsh doesn't word-split.
+        dirs="${LIST_PROJECTS_DIRS:-${HOME}/dev:${HOME}/worktrees}:"
+        while [ -n "${dirs}" ]; do
+            dir="${dirs%%:*}"
+            dirs="${dirs#*:}"
+            case "${dir}" in
+                '') continue ;;
+                \~ | \~/*) dir="${HOME}${dir#\~}" ;;
+            esac
+            set -- "$@" "${dir}"
+        done
+    fi
+    if command -v fd >/dev/null 2>&1; then
+        fd '^\.git$' --hidden --no-ignore-vcs --color=never --prune \
+            --maxdepth="${depth}" --format '{//}' "$@" 2>/dev/null
+    else
+        find -H "$@" -maxdepth "${depth}" -name .git -prune -exec dirname {} \; 2>/dev/null
+    fi
+}
+
 _select_project() {
-    __selected="$(find ~/{dev,worktrees,projects,dev/*git*/*} -maxdepth 3 \( -name .git -or -name packed-refs \) -prune -exec dirname {} \; 2>/dev/null | grep -v /trash/ | fzf --keep-right)"
+    __selected="$(_list_projects | grep -v /trash/ | fzf --keep-right)"
     [ -n "${__selected}" ] && echo "${__selected}" && return 0
     return 1
 }
