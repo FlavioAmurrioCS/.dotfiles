@@ -5,24 +5,24 @@ set -euo pipefail
 cfg=$(readlink -f "$HOME/.config/ghostty/config.ghostty")
 
 if [[ ${1:-} == --apply ]]; then
-  awk -F' *= *' '
+    awk -F' *= *' '
     $1=="palette"      { printf "\033]4;%s;%s\007", $2, $3 }
     $1=="foreground"   { printf "\033]10;%s\007", $2 }
     $1=="background"   { printf "\033]11;%s\007", $2 }
     $1=="cursor-color" { printf "\033]12;%s\007", $2 }
   ' "$2" >/dev/tty
-  exit
+    exit
 fi
 
 # Ghostty puts its CLI on PATH only in its own windows.
 ghostty=ghostty
 if ! command -v ghostty >/dev/null; then
-  for app in "$HOME/Applications" /Applications; do
-    if [[ -x $app/Ghostty.app/Contents/MacOS/ghostty ]]; then
-      ghostty=$app/Ghostty.app/Contents/MacOS/ghostty
-      break
-    fi
-  done
+    for app in "$HOME/Applications" /Applications; do
+        if [[ -x $app/Ghostty.app/Contents/MacOS/ghostty ]]; then
+            ghostty=$app/Ghostty.app/Contents/MacOS/ghostty
+            break
+        fi
+    done
 fi
 
 reset() { printf '\033]104\007\033]110\007\033]111\007\033]112\007' >/dev/tty; }
@@ -30,20 +30,23 @@ reset() { printf '\033]104\007\033]110\007\033]111\007\033]112\007' >/dev/tty; }
 # The preview runs in fzf's shell, so its $i must stay unexpanded here.
 # shellcheck disable=SC2016
 choice=$("$ghostty" +list-themes --plain --path --color="${1:-dark}" |
-  sed -E 's/^(.*) \((resources|user)\) (.*)$/\1\t\3/' |
-  fzf --delimiter '\t' --with-nth 1 \
-      --bind "focus:execute-silent('$0' --apply {2})" \
-      --preview 'for i in $(seq 0 15); do printf "\033[38;5;%sm Color %s\033[0m\n" $i $i; done' \
-      --preview-window right,20) || { reset; exit 1; }
+    sed -E 's/^(.*) \((resources|user)\) (.*)$/\1\t\3/' |
+    fzf --delimiter '\t' --with-nth 1 \
+        --bind "focus:execute-silent('$0' --apply {2})" \
+        --preview 'for i in $(seq 0 15); do printf "\033[38;5;%sm Color %s\033[0m\n" $i $i; done' \
+        --preview-window right,20) || {
+    reset
+    exit 1
+}
 
 name=${choice%%$'\t'*}
 reset
 if grep -q '^theme *=' "$cfg"; then
-  # awk instead of sed -i, which takes different arguments on macOS and Linux.
-  # ENVIRON keeps names such as "Jack O' Lantern" literal.
-  updated=$(NAME=$name awk '/^theme *=/ { print "theme = " ENVIRON["NAME"]; next } 1' "$cfg")
-  printf '%s\n' "$updated" >"$cfg"
+    # awk instead of sed -i, which takes different arguments on macOS and Linux.
+    # ENVIRON keeps names such as "Jack O' Lantern" literal.
+    updated=$(NAME=$name awk '/^theme *=/ { print "theme = " ENVIRON["NAME"]; next } 1' "$cfg")
+    printf '%s\n' "$updated" >"$cfg"
 else
-  printf 'theme = %s\n' "$name" >>"$cfg"
+    printf 'theme = %s\n' "$name" >>"$cfg"
 fi
 echo "theme = $name  → reload Ghostty config with Cmd+Shift+,"

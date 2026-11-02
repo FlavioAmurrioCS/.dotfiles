@@ -26,3 +26,14 @@ ignore = [
   # Reports `. "${HOME}/..."` as relative to the current directory.
   "C160",
 ]
+
+# The same style as shfmt (see ~/.editorconfig), which formats this repo.
+# Don't format with shuck yet. In 0.2.7, switch-case-indent also splits each
+# one-line case branch over three lines, which shfmt -ci doesn't:
+# https://github.com/ewhauser/shuck/issues/1360
+# And a multi-line $(...) holding '"' inside "${x:-"..."}" gets a stray } after
+# it: https://github.com/ewhauser/shuck/issues/1359
+[format]
+indent-style = "space"
+indent-width = 4
+switch-case-indent = true

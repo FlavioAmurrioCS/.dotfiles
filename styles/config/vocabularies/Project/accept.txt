@@ -10,6 +10,7 @@ mise('s)?
 nvim
 ryl
 scp
+shfmt('s)?
 symlink
 tmux
 tombi('s)?

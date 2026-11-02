@@ -26,6 +26,7 @@
 "~/.config/ty/ty.toml" = { source = "~/.dotfiles/.config/ty/ty.toml" }
 "~/.config/vale/.vale.ini" = { source = "~/.dotfiles/.config/vale/.vale.ini" }
 "~/.config/worktrunk/config.toml" = { source = "~/.dotfiles/.config/worktrunk/config.toml" }
+"~/.editorconfig" = { source = "~/.dotfiles/.editorconfig" }
 "~/.hushlogin" = { source = "~/.dotfiles/.hushlogin" }
 # One link per script: ~/.local/bin also holds mise, uv tools and other installs.
 "~/.local/bin" = { source = "~/.dotfiles/.local/bin", mode = "symlink-each" }

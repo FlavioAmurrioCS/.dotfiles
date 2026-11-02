@@ -8,19 +8,24 @@
 # rest (.zprofile, .zshrc, .zlogin) from ZDOTDIR. Those are untracked stubs
 # from ~/.dotfiles/stubs, so installers can append to them.
 # shellcheck source=/dev/null
-if [ -f "$HOME/.config/shell/trace.sh" ]; then . "$HOME/.config/shell/trace.sh"
-else __trace_start() { :; }; __trace_end() { :; }; __trace_note() { :; }; fi
-__trace_start "$HOME/.zshenv"
+if [ -f "${HOME}/.config/shell/trace.sh" ]; then
+    . "${HOME}/.config/shell/trace.sh"
+else
+    __trace_start() { :; }
+    __trace_end() { :; }
+    __trace_note() { :; }
+fi
+__trace_start "${HOME}/.zshenv"
 
-export ZDOTDIR="${XDG_CONFIG_HOME:-$HOME/.config}/zsh"
+export ZDOTDIR="${XDG_CONFIG_HOME:-${HOME}/.config}/zsh"
 
-# Installers that honour ZDOTDIR (rustup, for one) write $ZDOTDIR/.zshenv,
+# Installers that honour ZDOTDIR (rustup, for one) write ${ZDOTDIR}/.zshenv,
 # which zsh only reads by itself when ZDOTDIR is already set.
-if [ -f "$ZDOTDIR/.zshenv" ]; then
-  __trace_start "$ZDOTDIR/.zshenv"
-  # shellcheck source=/dev/null
-  . "$ZDOTDIR/.zshenv"
-  __trace_end "$ZDOTDIR/.zshenv"
+if [ -f "${ZDOTDIR}/.zshenv" ]; then
+    __trace_start "${ZDOTDIR}/.zshenv"
+    # shellcheck source=/dev/null
+    . "${ZDOTDIR}/.zshenv"
+    __trace_end "${ZDOTDIR}/.zshenv"
 fi
 
-__trace_end "$HOME/.zshenv"
+__trace_end "${HOME}/.zshenv"

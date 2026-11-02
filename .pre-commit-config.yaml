@@ -41,7 +41,9 @@ repos:
       # - id: actionlint
       - id: rumdl-check
       - id: rumdl-fmt
-      # - id: shfmt
+      - id: shfmt
+        # Only --write: any formatting flag makes shfmt skip .editorconfig.
+        args: [--write]
       - id: shellcheck
       - id: mise-ripsecrets
       # - id: sourcemeta-jsonschema-lint

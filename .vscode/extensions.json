@@ -4,6 +4,8 @@
     "charliermarsh.ruff",
     "astral-sh.ty",
     "owenlamont.ryl",
+    "mkhl.shfmt",
+    "foxundermoon.shell-format",
     "timonwong.shellcheck",
     "tombi-toml.tombi",
     "chrischinchilla.vale-vscode"

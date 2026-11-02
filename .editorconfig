@@ -1,0 +1,23 @@
+################################################################################
+# Location Docs: https://github.com/mvdan/sh/blob/v3.14.1/cmd/shfmt/shfmt.1.scd (EXAMPLES; shfmt has no config file of its own)
+# Location User: ~/.editorconfig (applies to everything under ~)
+# Location Repo: ./.editorconfig (this file: the repo root mirrors ~)
+# Location Check: printf 'case x in\na) :;;\nesac\n' | shfmt --filename ~/t.sh (a) indented 4 spaces when loaded)
+################################################################################
+# shfmt reads these settings only when no formatting flags are passed, so
+# `shfmt -i 2 ...` ignores this file. Editors that support EditorConfig
+# (nvim, VS Code, JetBrains) read it too, so it sets only shell files.
+# Matches `shfmt --indent=4 --case-indent`.
+
+root = true
+
+[*.{sh,bash,zsh}]
+indent_style = space
+indent_size = 4
+switch_case_indent = true
+
+# shfmt's own extension: shell scripts without an extension, by shebang or name.
+[[shell]]
+indent_style = space
+indent_size = 4
+switch_case_indent = true
