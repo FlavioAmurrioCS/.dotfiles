@@ -285,7 +285,8 @@ Pattern: `~/.config/<tool>/config` plus sibling files (`ignore`, `attributes`).
 - **User:** `$XDG_CONFIG_HOME/git/config` (default `~/.config/git/config`),
   then `~/.gitconfig`. Both are read and `~/.gitconfig` wins, and
   `git config --global` writes to `~/.gitconfig` whenever it exists. Keep it
-  out of `~`. `ignore` and `attributes` in the same directory are the defaults
+  out of `~`: `install.sh` warns about it, and `install.sh --backup` moves it
+  aside. `ignore` and `attributes` in the same directory are the defaults
   for `core.excludesFile` and `core.attributesFile`.
 - **Project:** none in the sense used here. Each repo has its own
   `.git/config`, plus `.gitignore` and `.gitattributes` files.
@@ -383,7 +384,9 @@ with a plain file. So the startup files are owned by each machine:
   line that runs it on startup. fzf's key bindings load on the first `fzf` or
   the first Ctrl-R, which then opens fzf's history search.
 - `mise run stubs` copies a template only when the file doesn't exist, and
-  never overwrites. `install.sh` runs it.
+  never overwrites. `install.sh` runs it. `install.sh --backup` first moves
+  each startup file that differs from its template into
+  `~/.dotfiles-backup/<timestamp>/`. The templates then take its place.
 - Lines that installers add stay on that machine. Move anything you want everywhere
   into the shared shell code, or into the untracked `~/.localrc` when it's
   machine-specific.

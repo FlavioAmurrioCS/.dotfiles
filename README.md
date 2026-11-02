@@ -14,9 +14,21 @@ The script installs mise, clones this repo to `~/.dotfiles`, and links
 `mise dotfiles apply`, `mise install`, `vale sync`, `mise run setup` and
 `mise run stubs`. Re-running it is safe.
 
-It warns about any `~/.zshrc`, `~/.zprofile`, `~/.zlogin` or `~/.zlogout` it
-finds: `~/.zshenv` points zsh at `~/.config/zsh`, so zsh skips those files.
-Move what you need from them into the same file in `~/.config/zsh/`.
+mise won't replace an existing file or folder with a link, so on a machine
+with its own configs the install stops at `mise dotfiles apply`. Run
+`bash install.sh --backup` to move those files into
+`~/.dotfiles-backup/<timestamp>/` first, at the same path relative to `~`.
+It moves the files that block a link, and each shell startup file that differs
+from its template in `stubs/`. It also moves the files below. It prints each
+file it moves.
+
+Without `--backup`, it warns about these files instead:
+
+- `~/.zshrc`, `~/.zprofile`, `~/.zlogin` and `~/.zlogout`: `~/.zshenv`
+  points zsh at `~/.config/zsh`, so zsh skips them. Move what you need into
+  the same file in `~/.config/zsh/`.
+- `~/.gitconfig`: git reads it after `~/.config/git/config`, and its keys win.
+  Move what you need into the untracked `~/.config/git/config.local`.
 
 ## How it works
 
