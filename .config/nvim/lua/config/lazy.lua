@@ -14,6 +14,16 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
+-- Ghostty ships Neovim filetype and syntax files for its config. lazy.nvim
+-- resets the runtime path, so add them back below.
+local ghostty_site = vim.iter({ "~/Applications", "/Applications" })
+  :map(function(dir)
+    return vim.fn.expand(dir) .. "/Ghostty.app/Contents/Resources/nvim/site"
+  end)
+  :find(function(dir)
+    return vim.uv.fs_stat(dir) ~= nil
+  end)
+
 require("lazy").setup({
   spec = {
     -- add LazyVim and import its plugins
@@ -37,6 +47,7 @@ require("lazy").setup({
   }, -- automatically check for plugin updates
   performance = {
     rtp = {
+      paths = { ghostty_site },
       -- disable some rtp plugins
       disabled_plugins = {
         "gzip",

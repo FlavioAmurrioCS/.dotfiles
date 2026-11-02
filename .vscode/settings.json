@@ -21,5 +21,12 @@
     "editor.defaultFormatter": "mkhl.shfmt"
   },
   // The ty extension provides the language server, so turn off Pylance's.
-  "python.languageServer": "None"
+  "python.languageServer": "None",
+  // Config files VS Code doesn't recognise by name (also see .gitattributes).
+  "files.associations": {
+    "shellcheckrc": "properties",
+    "*.ghostty": "properties",
+    "**/ghostty/themes/*": "properties",
+    "**/.config/git/ignore": "ignore"
+  }
 }

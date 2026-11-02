@@ -1,0 +1,8 @@
+# Syntax highlighting on GitHub for files Linguist doesn't recognise by name.
+# Language names: https://github.com/github-linguist/linguist/blob/main/lib/linguist/languages.yml
+/.config/shellcheckrc linguist-language=ShellCheck-Config
+/.config/git/config linguist-language=Git-Config
+/.config/git/ignore linguist-language=Ignore-List
+# Linguist has no Ghostty language; its key = value lines read as INI.
+/.config/ghostty/config.ghostty linguist-language=INI
+/.config/ghostty/themes/* linguist-language=INI
