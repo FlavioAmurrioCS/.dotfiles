@@ -71,9 +71,22 @@ if ! command -v mise >/dev/null 2>&1; then
     export PATH="${HOME}/.local/bin:${PATH}"
 fi
 
-if [[ ! -d "${DOTFILES}/.git" ]]; then
+# Run from a clone, use that clone. Piped (curl | bash), clone to DOTFILES.
+script="${BASH_SOURCE[0]:-}"
+if [[ -f "${script}" && -e "$(dirname "${script}")/.git" ]]; then
+    DOTFILES="$(cd "$(dirname "${script}")" && pwd -P)"
+elif [[ ! -d "${DOTFILES}/.git" ]]; then
     git clone "${REPO_URL}" "${DOTFILES}"
 fi
+
+# Every link and setting uses ~/.dotfiles, so point it at the clone.
+if [[ ! -e "${HOME}/.dotfiles" && ! -L "${HOME}/.dotfiles" ]]; then
+    ln -s "${DOTFILES}" "${HOME}/.dotfiles"
+elif [[ "$(cd "${HOME}/.dotfiles" 2>/dev/null && pwd -P)" != "$(cd "${DOTFILES}" && pwd -P)" ]]; then
+    echo "error: ~/.dotfiles isn't ${DOTFILES}; move it aside and run again" >&2
+    exit 1
+fi
+DOTFILES="${HOME}/.dotfiles"
 
 mkdir -p "${HOME}/.config/mise/conf.d"
 mapping="${HOME}/.config/mise/conf.d/dotfiles.toml"

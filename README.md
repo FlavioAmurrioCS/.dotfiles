@@ -9,10 +9,16 @@ allows it.
 bash install.sh
 ```
 
-The script installs mise, clones this repo to `~/.dotfiles`, and links
-`.config/mise/conf.d/dotfiles.toml` into `~/.config/mise/conf.d/`. Then it runs
+The script installs mise, clones this repo to `~/.dotfiles` (or uses the clone
+it runs from), and links `.config/mise/conf.d/dotfiles.toml` into
+`~/.config/mise/conf.d/`. Then it runs
 `mise dotfiles apply`, `mise install`, `vale sync`, `mise run setup` and
 `mise run stubs`. Re-running it is safe.
+
+Every link goes through `~/.dotfiles`. Run from a clone elsewhere, such as
+`/workspace/.dotfiles` on Coder, where a restart resets everything outside
+`/workspace`, the script links `~/.dotfiles` to that clone. If `~/.dotfiles`
+already exists and is a different folder, it stops.
 
 mise won't replace an existing file or folder with a link, so on a machine
 with its own configs the install stops at `mise dotfiles apply`. Run
