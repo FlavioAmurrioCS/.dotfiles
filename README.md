@@ -5,9 +5,33 @@ allows it.
 
 ## Install
 
+Pick one. Each needs only `git`, `curl` and `bash`.
+
+Download and run the script, which clones to `~/.dotfiles`:
+
+<!-- rumdl-disable MD013 -->
 ```sh
-bash install.sh
+curl -fsSL https://raw.githubusercontent.com/FlavioAmurrioCS/.dotfiles/main/install.sh | bash
 ```
+<!-- rumdl-enable MD013 -->
+
+Clone first, then run the script from the clone:
+
+```sh
+git clone https://github.com/FlavioAmurrioCS/.dotfiles.git ~/.dotfiles
+~/.dotfiles/install.sh
+```
+
+On Coder, clone into `/workspace` instead, and rerun the script after each
+restart:
+
+```sh
+git clone https://github.com/FlavioAmurrioCS/.dotfiles.git /workspace/.dotfiles
+/workspace/.dotfiles/install.sh
+```
+
+To pass `--backup` (see below) to the piped script, use
+`curl -fsSL <url> | bash -s -- --backup`.
 
 The script installs mise, clones this repo to `~/.dotfiles` (or uses the clone
 it runs from), and links `.config/mise/conf.d/dotfiles.toml` into
