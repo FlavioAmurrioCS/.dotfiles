@@ -6,6 +6,9 @@
 #   __trace_end <file>            after it
 #   __trace_note <text>           a line inside the current file
 #
+# With a clock, it ends with "first prompt +Nms": the time from the startup
+# files ending to the first prompt, which the tree doesn't cover.
+#
 # Prints only in interactive shells, to stderr. DOTFILES_TRACE=0 silences it.
 # Plain POSIX sh so sh, bash 3.2, bash 5 and zsh can all source it, and no
 # $(...), whose forks would show up in the timings.
@@ -71,6 +74,32 @@ __trace_end() {
     fi
     __trace_path "$1"
     __trace_line "└ ${__TRACE_PATH}${__trace_took}"
+    if [ "${__TRACE_DEPTH}" -eq 0 ]; then
+        __trace_hook_prompt
+    fi
+}
+
+# Runs when an outermost file ends. The last one to end sets the start of the
+# "first prompt" time. The hook is added once, after what PROMPT_COMMAND
+# already holds, so it times cmux's bootstrap but not hooks added later
+# (Ghostty's) or the PS1 expansion.
+__trace_hook_prompt() {
+    __trace_now
+    __TRACE_DONE=${__TRACE_NOW}
+    [ -n "${__TRACE_DONE}" ] && [ -z "${__TRACE_HOOKED:-}" ] || return 0
+    __TRACE_HOOKED=1
+    if [ -n "${ZSH_VERSION:-}" ]; then
+        eval 'precmd_functions+=(__trace_first_prompt)'
+    elif [ -n "${BASH_VERSION:-}" ]; then
+        PROMPT_COMMAND="${PROMPT_COMMAND:+${PROMPT_COMMAND};}__trace_first_prompt"
+    fi
+}
+
+__trace_first_prompt() {
+    [ -n "${__TRACE_DONE:-}" ] || return 0
+    __trace_now
+    __trace_note "first prompt +$(((__TRACE_NOW - __TRACE_DONE) / 1000))ms"
+    __TRACE_DONE=
 }
 
 __trace_note() {

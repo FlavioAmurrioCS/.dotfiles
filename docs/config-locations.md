@@ -444,7 +444,10 @@ with a plain file. So the startup files are owned by each machine:
   to `~/.config/shell/dev.sh` like any other config.
 - Each stub, `.zshenv` and `dev.sh` call `.config/shell/trace.sh`, which prints
   a dimmed tree of the files sourced, with timings in bash 5 and zsh, in
-  interactive shells only. `DOTFILES_TRACE=0` turns it off.
+  interactive shells only. With timings, a last `first prompt +Nms` line shows
+  the work after the files: bash's history load and `PROMPT_COMMAND` hooks
+  such as cmux's bootstrap, but not hooks added later, like Ghostty's, or the
+  prompt's own expansion. `DOTFILES_TRACE=0` turns it off.
 - bash reads `~/.bashrc` for `ssh host cmd`, scp and rsync too. In
   non-interactive shells, `dev.sh` only adds `~/.local/bin` and mise's shims
   to `PATH` and sources `~/.secretsrc` and `~/.localrc`, then returns.

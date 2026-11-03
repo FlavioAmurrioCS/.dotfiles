@@ -91,8 +91,9 @@ Without `--backup`, it warns about these files instead:
   zsh or sh itself, and sh gets a POSIX-only part. It also sources the
   untracked `~/.secretsrc` and `~/.localrc`.
 - [`.config/shell/trace.sh`](.config/shell/trace.sh) prints a dimmed tree of
-  the files an interactive shell sources, with timings in bash 5 and zsh.
-  `DOTFILES_TRACE=0` turns it off.
+  the files an interactive shell sources, with timings in bash 5 and zsh,
+  then how long the first prompt took after them. `DOTFILES_TRACE=0` turns
+  it off.
 - Scripts in [`.local/bin/`](.local/bin/) get one link each in `~/.local/bin`
   (`mode = "symlink-each"`), since that directory also holds mise, uv tools
   and other installs. Python scripts use a `uv run --script` shebang, and
