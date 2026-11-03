@@ -236,7 +236,7 @@ _list_projects() {
 }
 
 _select_project() {
-    __selected="$(_list_projects | grep -v /trash/ | fzf --keep-right)"
+    __selected="$(_list_projects | grep -v /trash/ | command fzf --keep-right)"
     [ -n "${__selected}" ] && echo "${__selected}" && return 0
     return 1
 }
@@ -311,7 +311,7 @@ __get_repos__() {
         for i in $(echo "${GITHUB_FOLLOW}" | tr ' ' '\n' | sort -u); do
             ,cache __get_repos__ "${i}" &
         done
-    } | grep "ssh_url" | cut -d '"' -f4 | sort -u | fzf --multi --exit-0)"}
+    } | grep "ssh_url" | cut -d '"' -f4 | sort -u | command fzf --multi --exit-0)"}
 
     if [ -z "${projects}" ] && [ -z "${GITHUB_FOLLOW}" ]; then
         echo "Set GITHUB_FOLLOW to a list of github users/orgs to follow or pass in clone url directly. If github enterprise, set GITHUB_TOKEN as well." >&2
@@ -438,7 +438,7 @@ if [ "${__DEV_SH_IS_SOURCED__}" = 'true' ]; then
         return 1
     }
 
-    ,env() { env | fzf --multi; }
+    ,env() { env | command fzf --multi; }
     ,web() {
         __git_url=$(git remote get-url origin) || return 1
         case "${__git_url}" in
@@ -497,7 +497,8 @@ if [ "${__DEV_SH_IS_SOURCED__}" = 'true' ]; then
         unset -f fzf
         enable_autocomplete fzf "--${__DEV_SH_CURRENT_SHELL__}"
     }
-    # Inside $(...) or a pipe, as in ,cd, the load would be thrown away.
+    # Inside $(...) or a pipe the load would be thrown away, so skip it there.
+    # dev.sh's own helpers call `command fzf` and skip this wrapper.
     fzf() {
         [ "${BASH_SUBSHELL:-${ZSH_SUBSHELL:-0}}" -eq 0 ] && __dev_sh_fzf_load
         command fzf "${@}"
