@@ -532,11 +532,11 @@ if [ "${__DEV_SH_IS_SOURCED__}" = 'true' ]; then
                 _bash_history_sync
                 builtin history "$@"
             }
-            # Added in front of what's already there (Apple Terminal's cwd tracking,
-            # editor integrations), and only once when dev.sh is sourced again.
+            # Appended, and only once when dev.sh is sourced again. cmux's
+            # first-prompt bootstrap keeps only what follows it in PROMPT_COMMAND.
             case ";${PROMPT_COMMAND:-};" in
                 *";_bash_history_sync;"*) ;;
-                *) PROMPT_COMMAND="_bash_history_sync${PROMPT_COMMAND:+;${PROMPT_COMMAND}}" ;;
+                *) PROMPT_COMMAND="${PROMPT_COMMAND:+${PROMPT_COMMAND};}_bash_history_sync" ;;
             esac
             ## reedit a history substitution line if it failed
             shopt -s histreedit
