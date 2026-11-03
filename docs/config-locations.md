@@ -19,6 +19,7 @@ the [config-dir] proposal. Checked on macOS on 2026-10-25.
 | vale  | `<config-dir>/vale/.vale.ini`      | `.config/vale.ini` | Merges           |
 | tmux  | `~/.config/tmux/tmux.conf`         | No project config  | Loads all found  |
 | ghostty | `~/.config/ghostty/config.ghostty` | No project config | Loads all found |
+| cmux  | `~/.config/cmux/cmux.json`         | No (`.cmux/cmux.json`) | Project adds commands |
 | worktrunk | `~/.config/worktrunk/config.toml` | `.config/wt.toml` (own schema) | Merges |
 | git   | `~/.config/git/config`, `ignore`   | No (`.git/config`) | Merges           |
 | nvim  | `~/.config/nvim/` (directory)      | No (`exrc` only)   | User only        |
@@ -266,7 +267,7 @@ Pattern: `~/.config/<tool>/config.<tool>`.
   launch without any config, Ghostty creates a template there. This repo's
   file now prevents that.
 - **cmux** embeds Ghostty and reads the same files, so this config applies to
-  it too.
+  it too. cmux's own settings are in `cmux.json` (see [cmux](#cmux)).
 - **This repo:** `.config/ghostty/config.ghostty`, linked to the same path in
   `~`. No repo link, since there is no project lookup. It replaces the
   Application Support template, whose one setting (the quick terminal
@@ -280,6 +281,47 @@ Pattern: `~/.config/<tool>/config.<tool>`.
   `~/Applications/Ghostty.app/Contents/MacOS/ghostty`. `+show-config` prints
   the loaded settings and `+validate-config` checks them.
 - **Docs:** [file location in the Ghostty docs][ghostty-docs].
+
+## cmux
+
+Pattern: `~/.config/<tool>/<tool>.json`.
+
+- **User:** `~/.config/cmux/cmux.json`, on macOS too, with no
+  `XDG_CONFIG_HOME` needed ([paths][cmux-paths]). It holds app settings,
+  shortcuts, actions, custom commands and workspace layouts. Its values
+  override those saved in the Settings window.
+- **Fallbacks:** `~/.config/cmux/settings.json` and
+  `~/Library/Application Support/com.cmuxterm.app/settings.json` are older
+  names. cmux reads them only for settings `cmux.json` doesn't set, and copies
+  the first into a missing `cmux.json` on launch.
+- **History:** until cmux [#3409][cmux-3409] (May 2026), `settings.json` held
+  the app settings and `cmux.json` only commands and actions. Now `cmux.json`
+  holds both. The old `cmux-settings.schema.json` is only a `$ref` to
+  `cmux.schema.json`, so a `settings.json` follows the same schema. This repo
+  has no `settings.json`: any setting in one would apply wherever `cmux.json`
+  doesn't set it.
+- **Project:** the nearest `.cmux/cmux.json` or `cmux.json`, walking up from
+  the folder ([lookup][cmux-project]). Its actions, commands and
+  notification hooks are added to the global ones, and win on a clash. App
+  settings come from the global file only. `.config/` isn't searched.
+- **Format:** JSON with comments and trailing commas. `schemaVersion` stays 1
+  for now.
+- **Self-writing:** the Settings window and `cmux config set` edit keys in
+  place and keep comments. Through a symlink they write the target and keep
+  the link ([symlink handling][cmux-symlink]), so the change is written to
+  this repo's file.
+  With no `cmux.json` at all, cmux writes a commented template at launch.
+- **This repo:** `.config/cmux/cmux.json`, linked to the same path in `~`. It
+  has only the Location header, `$schema` and `schemaVersion`. It replaced the
+  untouched template cmux had written, now in `~/.dotfiles-backup/`, and the
+  leftover `settings.json` was deleted. No repo link, since cmux doesn't
+  search `.config/`.
+- **Terminal settings** come from Ghostty's config (see [ghostty](#ghostty)).
+- **Check:** `cmux config path` prints the files, docs and schema URLs, and
+  `cmux config doctor` validates them. `cmux reload-config` applies changes
+  without a restart. The CLI is at
+  `/Applications/cmux.app/Contents/Resources/bin/cmux`.
+- **Docs:** [cmux.json in the cmux docs][cmux-docs].
 
 ## worktrunk
 
@@ -444,6 +486,11 @@ with a plain file. So the startup files are owned by each machine:
 [tmux-load]: https://github.com/tmux/tmux/blob/92e14631d321c9a34c0b3ac39c7e576c1f4f97bf/cfg.c?plain=1#L113-L114
 [tmux-changes]: https://github.com/tmux/tmux/blob/5a820e63b72f05c121441149c72327aeeb16dfa4/CHANGES?plain=1#L1681-L1682
 [ghostty-docs]: https://github.com/ghostty-org/website/blob/3755ed6e61b250e994d0e46d55f2a11cb0aa482c/docs/config/index.mdx?plain=1#L36-L52
+[cmux-3409]: https://github.com/manaflow-ai/cmux/pull/3409
+[cmux-docs]: https://github.com/manaflow-ai/cmux/blob/21dcc2b27b2ed014d723067ed253702e914d97ca/web/app/%5Blocale%5D/(landing)/docs/configuration/page.tsx#L328-L365
+[cmux-paths]: https://github.com/manaflow-ai/cmux/blob/21dcc2b27b2ed014d723067ed253702e914d97ca/Sources/KeyboardShortcutSettingsFileStore.swift#L18-L39
+[cmux-project]: https://github.com/manaflow-ai/cmux/blob/21dcc2b27b2ed014d723067ed253702e914d97ca/Sources/CmuxConfig.swift#L2109-L2146
+[cmux-symlink]: https://github.com/manaflow-ai/cmux/blob/21dcc2b27b2ed014d723067ed253702e914d97ca/Packages/macOS/CmuxSettings/Sources/CmuxSettings/Stores/JSONConfigStore.swift#L366-L371
 [worktrunk-docs]: https://github.com/max-sixty/worktrunk/blob/2c04fb3704275aab69237db0bc322e33b3775b6a/docs/src/content/docs/config.md?plain=1#L66-L75
 [worktrunk-path]: https://github.com/max-sixty/worktrunk/blob/2c04fb3704275aab69237db0bc322e33b3775b6a/src/config/user/path.rs#L104-L117
 [worktrunk-schemas]: https://gist.github.com/FlavioAmurrioCS/665fa9175d7bdd7cc0fe8ff8afb89e26

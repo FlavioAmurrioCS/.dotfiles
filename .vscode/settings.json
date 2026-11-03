@@ -27,6 +27,7 @@
     "shellcheckrc": "properties",
     "*.ghostty": "properties",
     "**/ghostty/themes/*": "properties",
-    "**/.config/git/ignore": "ignore"
+    "**/.config/git/ignore": "ignore",
+    "**/cmux/cmux.json": "jsonc"
   }
 }

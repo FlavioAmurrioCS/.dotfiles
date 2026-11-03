@@ -1,0 +1,13 @@
+////////////////////////////////////////////////////////////////////////////////
+// Location Docs: https://cmux.com/docs/configuration#cmux-json
+// Location User: ~/.config/cmux/cmux.json
+// Location Repo: none (a project's .cmux/cmux.json adds commands and actions)
+// Location Check: cmux config path && cmux config doctor
+////////////////////////////////////////////////////////////////////////////////
+// JSON with comments. cmux's Settings window and `cmux config set` write here,
+// through the link, and keep comments. Terminal settings live in Ghostty's
+// config, which cmux also reads.
+{
+  "$schema": "https://raw.githubusercontent.com/manaflow-ai/cmux/main/web/data/cmux.schema.json",
+  "schemaVersion": 1
+}

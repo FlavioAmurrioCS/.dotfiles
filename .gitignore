@@ -16,3 +16,6 @@ uv.lock
 !/styles/config/
 /styles/config/*
 !/styles/config/vocabularies/
+
+# cmux locks this empty file beside cmux.json on every write and never removes it.
+/.config/cmux/*.cmux-write.lock
