@@ -9,6 +9,7 @@
 # not from this repo. Lookup details and sources: docs/config-locations.md.
 
 [dotfiles]
+"~/.config/cmux/cmux.json" = { source = "~/.dotfiles/.config/cmux/cmux.json" }
 "~/.config/ghostty/config.ghostty" = { source = "~/.dotfiles/.config/ghostty/config.ghostty" }
 "~/.config/ghostty/themes" = { source = "~/.dotfiles/.config/ghostty/themes" }
 "~/.config/git/config" = { source = "~/.dotfiles/.config/git/config" }
