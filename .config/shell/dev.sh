@@ -447,6 +447,27 @@ if [ "${__DEV_SH_IS_SOURCED__}" = 'true' ]; then
         esac
         ,runtool run rifle "${__git_url}"
     }
+    # Copies Ghostty's terminfo entry, xterm-ghostty, to a host, so keys and
+    # colors work there: https://ghostty.org/docs/help/terminfo. On the host,
+    # tic writes the system database if it can, else ~/.terminfo. Ghostty and
+    # cmux set TERMINFO to their app bundle; other shells look there too.
+    ,ssh-terminfo() {
+        local entry dir
+        if [ "$#" -eq 0 ]; then
+            echo "usage: ,ssh-terminfo [ssh options] <host>" >&2
+            return 2
+        fi
+        entry="$(infocmp -x xterm-ghostty 2>/dev/null)"
+        for dir in "${HOME}/Applications/Ghostty.app" /Applications/Ghostty.app /Applications/cmux.app; do
+            [ -n "${entry}" ] && break
+            entry="$(TERMINFO="${dir}/Contents/Resources/terminfo" infocmp -x xterm-ghostty 2>/dev/null)"
+        done
+        if [ -z "${entry}" ]; then
+            echo ",ssh-terminfo: no xterm-ghostty terminfo entry found" >&2
+            return 1
+        fi
+        printf '%s\n' "${entry}" | ssh "${@}" -- tic -x -
+    }
 
     __dev_sh_posix_setup
     # theme.sh writes the colors straight to /dev/tty, so it needs a terminal.
