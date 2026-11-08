@@ -404,7 +404,9 @@ Pattern: one file in `~` that points the rest at `~/.config/zsh`.
 - **Project:** none.
 - **macOS:** `/etc/zprofile` runs `path_helper`, which moves `PATH` entries
   added earlier (in `.zshenv`) behind the system folders, so `PATH` changes
-  go in `.zprofile`. `/etc/zshrc` puts `HISTFILE` at `$ZDOTDIR/.zsh_history`
+  go in `.zprofile`. It also puts `/etc/paths.d` entries, such as
+  `/opt/homebrew/bin`, behind `/etc/paths`, so `dev.sh` moves
+  `/opt/homebrew/bin` back to the front. `/etc/zshrc` puts `HISTFILE` at `$ZDOTDIR/.zsh_history`
   and Terminal.app's `.zsh_sessions/` in `$ZDOTDIR` too.
 - **This repo:** only `.zshenv` is tracked and linked. It sets `ZDOTDIR` and
   sources `$ZDOTDIR/.zshenv` if an installer created one. `.zprofile` and
