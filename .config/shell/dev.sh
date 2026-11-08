@@ -115,6 +115,10 @@ __dev_sh_path_prepend() {
     export PATH="${1}${__path:+:${__path}}"
     unset __path
 }
+# path_helper puts /etc/paths.d/homebrew behind /usr/local/bin and /usr/bin.
+if [ -d /opt/homebrew/bin ]; then
+    __dev_sh_path_prepend /opt/homebrew/bin
+fi
 __dev_sh_path_prepend "${HOME}/.local/bin"
 # export PATH="${TOOL_INSTALLER_BIN_DIR}:${HOME}/.local/bin:${PATH}"
 # export HATCH_ENV_TYPE_VIRTUAL_PATH="venv"
@@ -533,6 +537,16 @@ if [ "${__DEV_SH_IS_SOURCED__}" = 'true' ]; then
         wt "${@}"
     }
 
+    # OSC 7 tells the terminal the shell's folder, which new panes start in.
+    # cmux's shell integration sends it, but it's off for its ~1s first prompt.
+    # Control bytes are dropped so a folder name can't end the sequence early.
+    __dev_sh_report_cwd() {
+        [ "${__DEV_SH_LAST_CWD:-}" = "${PWD}" ] && return 0
+        __DEV_SH_LAST_CWD=${PWD}
+        local host=${HOSTNAME:-${HOST:-}}
+        builtin printf '\e]7;kitty-shell-cwd://%s%s\a' "${host//[[:cntrl:]]/}" "${PWD//[[:cntrl:]]/}"
+    }
+
     case "${__DEV_SH_CURRENT_SHELL__}" in
         bash)
             export BASH_SILENCE_DEPRECATION_WARNING=1
@@ -560,6 +574,12 @@ if [ "${__DEV_SH_IS_SOURCED__}" = 'true' ]; then
                 *";_bash_history_sync;"*) ;;
                 *) PROMPT_COMMAND="${PROMPT_COMMAND:+${PROMPT_COMMAND};}_bash_history_sync" ;;
             esac
+            if [ -n "${CMUX_WORKSPACE_ID:-}" ]; then
+                case ";${PROMPT_COMMAND};" in
+                    *";__dev_sh_report_cwd;"*) ;;
+                    *) PROMPT_COMMAND="${PROMPT_COMMAND};__dev_sh_report_cwd" ;;
+                esac
+            fi
             ## reedit a history substitution line if it failed
             shopt -s histreedit
             ## edit a recalled history line before executing
@@ -637,6 +657,9 @@ if [ "${__DEV_SH_IS_SOURCED__}" = 'true' ]; then
             bindkey -M emacs '^R' __dev_sh_fzf_history
             bindkey -M vicmd '^R' __dev_sh_fzf_history
             bindkey -M viins '^R' __dev_sh_fzf_history
+            if [ -n "${CMUX_WORKSPACE_ID:-}" ]; then
+                eval 'precmd_functions=(${precmd_functions:#__dev_sh_report_cwd} __dev_sh_report_cwd)'
+            fi
             ;;
         *)
             PS1="dev.sh: ${__DEV_SH_CURRENT_SHELL__} not supported"

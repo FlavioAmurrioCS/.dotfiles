@@ -316,7 +316,9 @@ Pattern: `~/.config/<tool>/<tool>.json`.
   this repo's file.
   With no `cmux.json` at all, cmux writes a commented template at launch.
 - **This repo:** `.config/cmux/cmux.json`, linked to the same path in `~`. It
-  has only the Location header, `$schema` and `schemaVersion`. It replaced the
+  has the Location header, `$schema`, `schemaVersion` and
+  `app.workspaceInheritWorkingDirectory: false`, so new workspaces start in
+  `~`. It replaced the
   untouched template cmux had written, now in `~/.dotfiles-backup/`, and the
   leftover `settings.json` was deleted. No repo link, since cmux doesn't
   search `.config/`.
@@ -404,7 +406,9 @@ Pattern: one file in `~` that points the rest at `~/.config/zsh`.
 - **Project:** none.
 - **macOS:** `/etc/zprofile` runs `path_helper`, which moves `PATH` entries
   added earlier (in `.zshenv`) behind the system folders, so `PATH` changes
-  go in `.zprofile`. `/etc/zshrc` puts `HISTFILE` at `$ZDOTDIR/.zsh_history`
+  go in `.zprofile`. It also puts `/etc/paths.d` entries, such as
+  `/opt/homebrew/bin`, behind `/etc/paths`, so `dev.sh` moves
+  `/opt/homebrew/bin` back to the front. `/etc/zshrc` puts `HISTFILE` at `$ZDOTDIR/.zsh_history`
   and Terminal.app's `.zsh_sessions/` in `$ZDOTDIR` too.
 - **This repo:** only `.zshenv` is tracked and linked. It sets `ZDOTDIR` and
   sources `$ZDOTDIR/.zshenv` if an installer created one. `.zprofile` and
