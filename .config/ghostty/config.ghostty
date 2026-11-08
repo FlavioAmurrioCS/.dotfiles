@@ -11,9 +11,4 @@
 # Show or hide the quick terminal from any app.
 keybind = global:ctrl+opt+cmd+space=toggle_quick_terminal
 
-# When you ssh from Ghostty, install its terminfo on the host the first time
-# (ssh-terminfo), or fall back to TERM=xterm-256color (ssh-env). Without it,
-# a host that doesn't know xterm-ghostty garbles backspace and other keys.
-shell-integration-features = ssh-env,ssh-terminfo
-
 theme = theme-sh-bright

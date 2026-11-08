@@ -277,6 +277,10 @@ Pattern: `~/.config/<tool>/config.<tool>`.
   `.local/bin` picks a theme with fzf, previews it live and writes the
   `theme =` line into the repo file. `dev.sh` skips theme.sh in Ghostty and
   cmux, so the theme isn't painted over.
+- **SSH:** the `ssh-env` and `ssh-terminfo` features are off, as by
+  default. A host that doesn't know `TERM=xterm-ghostty` gets the entry once
+  from `,ssh-terminfo [ssh options] <host>` in `dev.sh`, which runs Method 1
+  from [Ghostty's help page][ghostty-terminfo].
 - **Check:** the CLI is inside the app,
   `~/Applications/Ghostty.app/Contents/MacOS/ghostty`. `+show-config` prints
   the loaded settings and `+validate-config` checks them.
@@ -488,6 +492,7 @@ with a plain file. So the startup files are owned by each machine:
 [tmux-default]: https://github.com/tmux/tmux/blob/42374342711adfe3d39bb60d0bb9b45240ed5b06/Makefile.am?plain=1#L14
 [tmux-load]: https://github.com/tmux/tmux/blob/92e14631d321c9a34c0b3ac39c7e576c1f4f97bf/cfg.c?plain=1#L113-L114
 [tmux-changes]: https://github.com/tmux/tmux/blob/5a820e63b72f05c121441149c72327aeeb16dfa4/CHANGES?plain=1#L1681-L1682
+[ghostty-terminfo]: https://ghostty.org/docs/help/terminfo#method-1:-copy-ghostty's-terminfo-entry-to-the-remote-machine
 [ghostty-docs]: https://github.com/ghostty-org/website/blob/3755ed6e61b250e994d0e46d55f2a11cb0aa482c/docs/config/index.mdx?plain=1#L36-L52
 [cmux-3409]: https://github.com/manaflow-ai/cmux/pull/3409
 [cmux-docs]: https://github.com/manaflow-ai/cmux/blob/21dcc2b27b2ed014d723067ed253702e914d97ca/web/app/%5Blocale%5D/(landing)/docs/configuration/page.tsx#L328-L365
