@@ -410,14 +410,56 @@ if [ "${__DEV_SH_IS_SOURCED__}" = 'true' ]; then
         __trace_end "${*}"
     }
 
+    # Defers `enable_autocomplete <cmd...>` to the first `<name>`: it defines a
+    # `<name>` wrapper and a `__dev_sh_lazy_<name>` loader. The first call
+    # removes both, loads the integration, and runs `<name>` again: the tool's
+    # own function if its integration defines one (worktrunk's `wt`), else the
+    # binary. Completion works from the first call on.
+    # Inside $(...) or a pipe the load would be thrown away, so the wrapper
+    # skips it there and runs the binary.
+    # The command is quoted now, so its variables are read when this runs.
+    # ~/.localrc runs in sh and non-interactive shells too, which lack this:
+    #   command -v lazy_autocomplete >/dev/null 2>&1 &&
+    #       lazy_autocomplete gh gh completion -s bash
+    lazy_autocomplete() {
+        case "${1:-}" in
+            '' | *[!A-Za-z0-9_.,-]*)
+                echo "lazy_autocomplete: invalid name: ${1:-}" >&2
+                return 2
+                ;;
+        esac
+        if [ "$#" -lt 2 ]; then
+            echo "usage: lazy_autocomplete <name> <cmd...>" >&2
+            return 2
+        fi
+        __lazy_name="${1}"
+        shift
+        printf -v __lazy_cmd '%q ' "${@}"
+        eval "
+        __dev_sh_lazy_${__lazy_name}() {
+            unset -f ${__lazy_name} __dev_sh_lazy_${__lazy_name}
+            enable_autocomplete ${__lazy_cmd}
+        }
+        ${__lazy_name}() {
+            if [ \"\${BASH_SUBSHELL:-\${ZSH_SUBSHELL:-0}}\" -eq 0 ]; then
+                __dev_sh_lazy_${__lazy_name}
+                if typeset -f ${__lazy_name} >/dev/null 2>&1; then
+                    ${__lazy_name} \"\${@}\"
+                    return
+                fi
+            fi
+            command ${__lazy_name} \"\${@}\"
+        }"
+        unset __lazy_name __lazy_cmd
+    }
+
     # mise's shims by default: tools resolve, with no `mise hook-env` at startup
     # or at each prompt (about 30ms on an M3, 100ms on a Raspberry Pi 4).
-    # `,mise-activate` turns on full activation in this shell: uv_venv_auto and
-    # the env vars from mise config.
+    # The first `mise` turns on full activation in this shell: uv_venv_auto,
+    # the env vars from mise config, and completion. From then on, each prompt
+    # runs `mise hook-env`.
     __dev_sh_path_prepend "${MISE_DATA_DIR:-${XDG_DATA_HOME:-${HOME}/.local/share}/mise}/shims"
-    ,mise-activate() {
-        enable_autocomplete mise activate "${__DEV_SH_CURRENT_SHELL__}"
-    }
+    lazy_autocomplete mise mise activate "${__DEV_SH_CURRENT_SHELL__}"
 
     ,cd() {
         __selected="$(_select_project)"
@@ -518,24 +560,12 @@ if [ "${__DEV_SH_IS_SOURCED__}" = 'true' ]; then
 
     # fzf's key bindings and completion load on first use, not at startup: the
     # first `fzf`, or the first Ctrl-R (bound below for each shell).
-    __dev_sh_fzf_load() {
-        unset -f fzf
-        enable_autocomplete fzf "--${__DEV_SH_CURRENT_SHELL__}"
-    }
-    # Inside $(...) or a pipe the load would be thrown away, so skip it there.
     # dev.sh's own helpers call `command fzf` and skip this wrapper.
-    fzf() {
-        [ "${BASH_SUBSHELL:-${ZSH_SUBSHELL:-0}}" -eq 0 ] && __dev_sh_fzf_load
-        command fzf "${@}"
-    }
+    lazy_autocomplete fzf fzf "--${__DEV_SH_CURRENT_SHELL__}"
 
-    # worktrunk's shell integration loads on the first `wt`. It replaces this
-    # function with one that can cd into a new worktree, and adds completion.
-    wt() {
-        unset -f wt
-        enable_autocomplete "${WORKTRUNK_BIN:-wt}" config shell init "${__DEV_SH_CURRENT_SHELL__}"
-        wt "${@}"
-    }
+    # worktrunk's shell integration loads on the first `wt`. It defines a `wt`
+    # function that can cd into a new worktree, and adds completion.
+    lazy_autocomplete wt "${WORKTRUNK_BIN:-wt}" config shell init "${__DEV_SH_CURRENT_SHELL__}"
 
     # OSC 7 tells the terminal the shell's folder, which new panes start in.
     # cmux's shell integration sends it, but it's off for its ~1s first prompt.
@@ -614,18 +644,21 @@ if [ "${__DEV_SH_IS_SOURCED__}" = 'true' ]; then
 
                 echo "${__PS1_WRAPPER_START}${__PS1_USERNAME}${__PS1_AT}${__PS1_HOSTNAME} ${__PS1_WORKSPACE}${__PS1_WRAPPER_END}${__PS1_GIT}${__PS1_PROMPT}"
             )"
-            # Ctrl-R loads fzf, then opens its history search. Loading rebinds Ctrl-R
-            # to fzf's own widget. bash 3.2 binds it differently, so it keeps the
-            # plain history search there until the first `fzf`.
-            if [ "${BASH_VERSINFO[0]}" -ge 4 ]; then
-                __dev_sh_fzf_history() {
-                    DOTFILES_TRACE=0 __dev_sh_fzf_load
-                    __fzf_history__
-                }
-                bind -m emacs-standard -x '"\C-r": __dev_sh_fzf_history'
-                bind -m vi-command -x '"\C-r": __dev_sh_fzf_history'
-                bind -m vi-insert -x '"\C-r": __dev_sh_fzf_history'
-            fi
+            # Ctrl-R is a macro: \C-x\C-l loads fzf, which rebinds Ctrl-R, then the
+            # macro's own Ctrl-R opens fzf's history search. A macro, because in
+            # bash 3.2 fzf binds Ctrl-R as one too, and `bind -x` can't run it.
+            # The plain search comes back first, so a failed load doesn't loop.
+            __dev_sh_fzf_history() {
+                bind -m emacs-standard '"\C-r": reverse-search-history'
+                bind -m vi-command '"\C-r": reverse-search-history'
+                bind -m vi-insert '"\C-r": reverse-search-history'
+                typeset -f __dev_sh_lazy_fzf >/dev/null && DOTFILES_TRACE=0 __dev_sh_lazy_fzf
+            }
+            for __dev_sh_keymap in emacs-standard vi-command vi-insert; do
+                bind -m "${__dev_sh_keymap}" -x '"\C-x\C-l": __dev_sh_fzf_history'
+                bind -m "${__dev_sh_keymap}" '"\C-r": "\C-x\C-l\C-r"'
+            done
+            unset __dev_sh_keymap
             ;;
         zsh)
             # compinit's permission audit (compaudit) is half its cost. Run it only
@@ -650,7 +683,7 @@ if [ "${__DEV_SH_IS_SOURCED__}" = 'true' ]; then
             # Ctrl-R loads fzf, then opens its history search. Loading rebinds Ctrl-R
             # to fzf's own widget.
             __dev_sh_fzf_history() {
-                DOTFILES_TRACE=0 __dev_sh_fzf_load
+                typeset -f __dev_sh_lazy_fzf >/dev/null && DOTFILES_TRACE=0 __dev_sh_lazy_fzf
                 zle fzf-history-widget
             }
             zle -N __dev_sh_fzf_history

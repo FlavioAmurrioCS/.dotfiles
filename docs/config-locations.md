@@ -461,11 +461,12 @@ with a plain file. So the startup files are owned by each machine:
   same stream. `ssh <host> true | wc -c` should print 0.
 - `dev.sh` moves `~/.local/bin` and the shims to the front of `PATH` rather
   than adding them again, so nested shells such as tmux don't grow it.
-- mise uses its shims by default. `,mise-activate` turns on full activation
-  (`uv_venv_auto` and the env vars from mise config) in that shell, at about
-  30 ms on an M3 and 100 ms on a Raspberry Pi 4. Each stub has a commented-out
-  line that runs it on startup. fzf's key bindings load on the first `fzf` or
-  the first Ctrl-R, which then opens fzf's history search.
+- mise uses its shims by default. The first `mise` in a shell turns on full
+  activation (`uv_venv_auto` and the env vars from mise config), which then
+  costs about 30 ms per prompt on an M3 and 100 ms on a Raspberry Pi 4.
+  fzf's key bindings load on the first `fzf` or the first Ctrl-R, which then
+  opens fzf's history search. `lazy_autocomplete` in `dev.sh` defers these
+  loads, and `~/.localrc` can use it for other tools.
 - `mise run stubs` copies a template only when the file doesn't exist, and
   never overwrites. `install.sh` runs it. `install.sh --backup` first moves
   each startup file that differs from its template into
