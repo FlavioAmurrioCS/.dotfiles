@@ -9,9 +9,5 @@
 // config, which cmux also reads.
 {
   "$schema": "https://raw.githubusercontent.com/manaflow-ai/cmux/main/web/data/cmux.schema.json",
-  "schemaVersion": 1,
-  "app": {
-    // New workspaces start in ~, not the current workspace's folder.
-    "workspaceInheritWorkingDirectory": false
-  }
+  "schemaVersion": 1
 }

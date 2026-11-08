@@ -316,9 +316,7 @@ Pattern: `~/.config/<tool>/<tool>.json`.
   this repo's file.
   With no `cmux.json` at all, cmux writes a commented template at launch.
 - **This repo:** `.config/cmux/cmux.json`, linked to the same path in `~`. It
-  has the Location header, `$schema`, `schemaVersion` and
-  `app.workspaceInheritWorkingDirectory: false`, so new workspaces start in
-  `~`. It replaced the
+  has only the Location header, `$schema` and `schemaVersion`. It replaced the
   untouched template cmux had written, now in `~/.dotfiles-backup/`, and the
   leftover `settings.json` was deleted. No repo link, since cmux doesn't
   search `.config/`.

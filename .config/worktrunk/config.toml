@@ -12,16 +12,6 @@
 worktree-path = "{{ repo_path }}/../{{ branch | sanitize }}"
 skip-shell-integration-prompt = true
 
-[post-start]
-# Pre-sets origin/<branch> as upstream so later pushes need no -u, which writes
-# .git/config and fails inside Claude Code's sandbox.
-track = '''
-git remote get-url origin >/dev/null 2>&1 || exit 0
-git rev-parse --abbrev-ref '@{upstream}' >/dev/null 2>&1 && exit 0
-git config branch.{{ branch }}.remote origin
-git config branch.{{ branch }}.merge refs/heads/{{ branch }}
-'''
-
 [post-switch]
 cmux = '''
 export CMUX_QUIET=1
