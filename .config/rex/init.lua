@@ -1,0 +1,9 @@
+--------------------------------------------------------------------------------
+-- Location Docs: https://www.superlogical.com/rex/docs/customize/config#file-location
+-- Location User: ~/.config/rex/init.lua (the whole directory is linked)
+-- Location Repo: none (Rex has no project config)
+-- Location Check: rex config check
+--------------------------------------------------------------------------------
+-- Lua 5.1, run by the Rex server each time it loads. Rex doesn't watch this
+-- file: apply changes with `rex config reload`. `require("keys")` loads
+-- keys.lua from this directory. Functions: https://www.superlogical.com/rex/docs/reference/lua

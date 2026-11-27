@@ -20,6 +20,7 @@ the [config-dir] proposal. Checked on macOS on 2026-10-25.
 | tmux  | `~/.config/tmux/tmux.conf`         | No project config  | Loads all found  |
 | ghostty | `~/.config/ghostty/config.ghostty` | No project config | Loads all found |
 | cmux  | `~/.config/cmux/cmux.json`         | No (`.cmux/cmux.json`) | Project adds commands |
+| rex   | `~/.config/rex/` (directory)       | No project config  | User only        |
 | worktrunk | `~/.config/worktrunk/config.toml` | `.config/wt.toml` (own schema) | Merges |
 | git   | `~/.config/git/config`, `ignore`   | No (`.git/config`) | Merges           |
 | nvim  | `~/.config/nvim/` (directory)      | No (`exrc` only)   | User only        |
@@ -327,6 +328,32 @@ Pattern: `~/.config/<tool>/<tool>.json`.
   `/Applications/cmux.app/Contents/Resources/bin/cmux`.
 - **Docs:** [cmux.json in the cmux docs][cmux-docs].
 
+## rex
+
+Pattern: one symlink for a whole directory whose files are all tracked here.
+
+- **User:** `init.lua` in `$XDG_CONFIG_HOME/rex`, or `~/.config/rex` on macOS
+  too, with no `XDG_CONFIG_HOME` needed. `REX_CONFIG` names another file, and
+  must be set where the Rex server starts, since the server reads it.
+  `require` loads other Lua files from the same directory.
+- **Project:** none. The server reads the file on its own machine, and
+  refuses `rex config reload` over a remote connection.
+- **Format:** a Lua 5.1 script. `rex.bind`, `rex.action` and `rex.set` run
+  while the file loads. A bad `rex` call is skipped with an error, and a Lua
+  error fails the whole load. A reload then keeps the last good config.
+  Settings are only Resume Rules for now. There are no type definitions or
+  schema.
+- **Self-writing:** none. Rex only reads the file, and doesn't watch it.
+- **This repo:** `.config/rex/`, linked whole to `~/.config/rex`, so files
+  that `init.lua` loads with `require` are tracked here too. `init.lua` has
+  only the Location header for now.
+- **Check:** `rex config check [path]` loads a file without applying it and
+  exits 1 on errors. `rex keymap` asks the running server for the merged
+  bindings, and `rex config reload` applies changes.
+- **Docs:** the [Configuration File][rex-config] page and the
+  [Lua reference][rex-lua], read on 2026-11-27 (the site has no versioned
+  copy).
+
 ## worktrunk
 
 Pattern: `~/.config/<tool>/config.toml`.
@@ -502,6 +529,8 @@ with a plain file. So the startup files are owned by each machine:
 [cmux-paths]: https://github.com/manaflow-ai/cmux/blob/21dcc2b27b2ed014d723067ed253702e914d97ca/Sources/KeyboardShortcutSettingsFileStore.swift#L18-L39
 [cmux-project]: https://github.com/manaflow-ai/cmux/blob/21dcc2b27b2ed014d723067ed253702e914d97ca/Sources/CmuxConfig.swift#L2109-L2146
 [cmux-symlink]: https://github.com/manaflow-ai/cmux/blob/21dcc2b27b2ed014d723067ed253702e914d97ca/Packages/macOS/CmuxSettings/Sources/CmuxSettings/Stores/JSONConfigStore.swift#L366-L371
+[rex-config]: https://www.superlogical.com/rex/docs/customize/config
+[rex-lua]: https://www.superlogical.com/rex/docs/reference/lua
 [worktrunk-docs]: https://github.com/max-sixty/worktrunk/blob/2c04fb3704275aab69237db0bc322e33b3775b6a/docs/src/content/docs/config.md?plain=1#L66-L75
 [worktrunk-path]: https://github.com/max-sixty/worktrunk/blob/2c04fb3704275aab69237db0bc322e33b3775b6a/src/config/user/path.rs#L104-L117
 [worktrunk-schemas]: https://gist.github.com/FlavioAmurrioCS/665fa9175d7bdd7cc0fe8ff8afb89e26
