@@ -60,6 +60,8 @@ done
 '''
 
 [settings]
+# `mise lock` writes entries for these platforms only, plus the current one.
+lockfile_platforms = ["macos-arm64", "linux-arm64", "linux-x64"]
 idiomatic_version_file_enable_tools = ["python"]
 python.uv_venv_auto = "create|source"
 disable_update_warning = true
