@@ -17,6 +17,7 @@
 "~/.config/mise/conf.d/dotfiles.toml" = { source = "~/.dotfiles/.config/mise/conf.d/dotfiles.toml" }
 "~/.config/mise/conf.d/tools.toml" = { source = "~/.dotfiles/.config/mise/conf.d/tools.toml" }
 "~/.config/nvim" = { source = "~/.dotfiles/.config/nvim" }
+"~/.config/rex" = { source = "~/.dotfiles/.config/rex" }
 "~/.config/ruff/ruff.toml" = { source = "~/.dotfiles/.config/ruff/ruff.toml" }
 "~/.config/ryl/ryl.toml" = { source = "~/.dotfiles/.config/ryl/ryl.toml" }
 "~/.config/shell/dev.sh" = { source = "~/.dotfiles/.config/shell/dev.sh" }

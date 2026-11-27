@@ -1,4 +1,5 @@
 [Gg]hostty
+[Rr]ex
 [Ww]orktrunk
 cmux
 dotfiles
