@@ -22,7 +22,7 @@ the [config-dir] proposal. Checked on macOS on 2026-10-25.
 | cmux  | `~/.config/cmux/cmux.json`         | No (`.cmux/cmux.json`) | Project adds commands |
 | rex   | `~/.config/rex/` (directory)       | No project config  | User only        |
 | worktrunk | `~/.config/worktrunk/config.toml` | `.config/wt.toml` (own schema) | Merges |
-| git   | `~/.config/git/config`, `ignore`   | No (`.git/config`) | Merges           |
+| git   | `~/.config/git/config` (stub), `ignore` | No (`.git/config`) | Merges |
 | nvim  | `~/.config/nvim/` (directory)      | No (`exrc` only)   | User only        |
 | zsh   | `~/.zshenv` + `$ZDOTDIR/.z*`       | No project config  | Loads all found  |
 | bash  | `~/.bash_profile`, `~/.bashrc`     | No project config  | First found      |
@@ -387,21 +387,32 @@ Pattern: `~/.config/<tool>/config.toml`.
 
 ## git
 
-Pattern: `~/.config/<tool>/config` plus sibling files (`ignore`, `attributes`).
+Pattern: an untracked stub from `stubs/` that includes a tracked fragment.
 
 - **User:** `$XDG_CONFIG_HOME/git/config` (default `~/.config/git/config`),
-  then `~/.gitconfig`. Both are read and `~/.gitconfig` wins, and
-  `git config --global` writes to `~/.gitconfig` whenever it exists. Keep it
-  out of `~`: `install.sh` warns about it, and `install.sh --backup` moves it
-  aside. `ignore` and `attributes` in the same directory are the defaults
-  for `core.excludesFile` and `core.attributesFile`.
+  then `~/.gitconfig`. Both are read, and `~/.gitconfig` wins.
+  `git config --global` writes to `~/.gitconfig` when it exists, else to
+  `~/.config/git/config`. `ignore` and `attributes` in the same directory are
+  the defaults for `core.excludesFile` and `core.attributesFile`.
 - **Project:** none in the sense used here. Each repo has its own
   `.git/config`, plus `.gitignore` and `.gitattributes` files.
-- **Combines:** system, then global, then repo config, merged key by key.
-- **This repo:** `.config/git/config` and `.config/git/ignore`, linked to the
-  same paths in `~`. Machine-specific values such as a work email go in the
-  untracked `~/.config/git/config.local`, pulled in last with `[include]`.
-- **Docs:** [git-config FILES][git-docs].
+- **Combines:** system, then global, then repo config, merged key by key. An
+  `[include]` inserts the file's keys where the include is.
+- **Self-writing:** `git config --global`, `gh auth setup-git`, credential
+  helpers and work tools all write the global file. git never writes into an
+  included file. `GIT_CONFIG_GLOBAL` names another file in place of both
+  global files, for reads and writes. GUI apps don't inherit it.
+- **This repo:** `.config/git/dotfiles.gitconfig`, linked to
+  `~/.config/git/dotfiles.gitconfig`, holds the settings every machine
+  shares. `~/.config/git/config` is a stub (see [Stubs](#stubs)) whose
+  first section includes it, so global writes go to the stub and win over the
+  shared keys. `~/.gitconfig` is allowed, and is machine-owned too.
+  `.config/git/ignore` is linked like any other config.
+- **Check:** `git config --global --includes --list --show-origin`. With
+  `--global`, git follows includes only when given `--includes`, so a tool
+  that reads `git config --global user.email` sees only the stub's keys.
+  `git config --get user.email`, with no scope, follows them.
+- **Docs:** [git-config FILES][git-docs] and [includes][git-includes].
 
 ## nvim
 
@@ -441,7 +452,7 @@ Pattern: one file in `~` that points the rest at `~/.config/zsh`.
   sources `$ZDOTDIR/.zshenv` if an installer created one. `.zprofile` and
   `.zshrc` are untracked stubs from `stubs/`, created once by
   `mise run stubs`, so installers (including work ones) append to this
-  machine's copy rather than the repo. See [Shell stubs](#shell-stubs).
+  machine's copy rather than the repo. See [Stubs](#stubs).
 - **Docs:** zsh's [Startup/Shutdown Files][zsh-docs].
 
 ## bash and sh
@@ -456,7 +467,7 @@ Pattern: fixed paths in `~`. bash has no `ZDOTDIR` equivalent.
   `~/.profile`. Interactive non-login `sh` reads the file named by `$ENV`.
 - **Scripts** read none of them.
 - **This repo:** all three are untracked stubs. See
-  [Shell stubs](#shell-stubs).
+  [Stubs](#stubs).
 - **Docs:** [bash Startup Files][bash-docs].
 
 ## hushlogin
@@ -467,12 +478,15 @@ Pattern: fixed paths in `~`. bash has no `ZDOTDIR` equivalent.
 - **This repo:** `.hushlogin`, linked to `~/.hushlogin`.
 - **Docs:** `man login` (macOS) and `man login.defs` (Linux, `HUSHLOGIN_FILE`).
 
-## Shell stubs
+## Stubs
 
 Installers append to shell startup files, and work tools most of all.
 Through a symlink, `>>` writes into the repo, and `sed -i` replaces the link
-with a plain file. So the startup files are owned by each machine:
+with a plain file. git's global config gets the same writes from
+`git config --global`. So these files are owned by each machine:
 
+- `stubs/.config/git/config` includes the tracked
+  `~/.config/git/dotfiles.gitconfig` (see [git](#git)).
 - `stubs/` holds a template for each: `.bash_profile` (sources `.bashrc`),
   `.bashrc`, `.profile`, `.config/zsh/.zprofile` and `.config/zsh/.zshrc`.
   Each sources the shared shell code, `.config/shell/dev.sh`, which is linked
@@ -497,9 +511,11 @@ with a plain file. So the startup files are owned by each machine:
   opens fzf's history search. `lazy_autocomplete` in `dev.sh` defers these
   loads, and `~/.localrc` can use it for other tools.
 - `mise run stubs` copies a template only when the file doesn't exist, and
-  never overwrites. `install.sh` runs it. `install.sh --backup` first moves
-  each startup file that differs from its template into
-  `~/.dotfiles-backup/<timestamp>/`. The templates then take its place.
+  never overwrites. A link into `~/.dotfiles` is the exception: the file was
+  linked before it became a stub, so the link is replaced with the template.
+  `install.sh` runs it. `install.sh --backup` first moves each file that
+  differs from its template into `~/.dotfiles-backup/<timestamp>/`. The
+  templates then take its place.
 - Lines that installers add stay on that machine. Move anything you want everywhere
   into the shared shell code, or into the untracked `~/.localrc` when it's
   machine-specific.
@@ -537,6 +553,7 @@ with a plain file. So the startup files are owned by each machine:
 [worktrunk-path]: https://github.com/max-sixty/worktrunk/blob/2c04fb3704275aab69237db0bc322e33b3775b6a/src/config/user/path.rs#L104-L117
 [worktrunk-4726]: https://github.com/max-sixty/worktrunk/pull/4726
 [git-docs]: https://git-scm.com/docs/git-config/2.50.1#FILES
+[git-includes]: https://git-scm.com/docs/git-config/2.50.1#_includes
 [LazyVim starter]: https://github.com/LazyVim/starter/tree/803bc181d7c0d6d5eeba9274d9be49b287294d99
 [nvim-config]: https://github.com/neovim/neovim/blob/779c36969e31080503be2dfccbcc3f999e289606/runtime/doc/starting.txt?plain=1#L465-L472
 [nvim-dirs]: https://github.com/neovim/neovim/blob/779c36969e31080503be2dfccbcc3f999e289606/runtime/doc/starting.txt?plain=1#L1374-L1389

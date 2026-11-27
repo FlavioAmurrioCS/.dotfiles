@@ -12,7 +12,7 @@
 "~/.config/cmux/cmux.json" = { source = "~/.dotfiles/.config/cmux/cmux.json" }
 "~/.config/ghostty/config.ghostty" = { source = "~/.dotfiles/.config/ghostty/config.ghostty" }
 "~/.config/ghostty/themes" = { source = "~/.dotfiles/.config/ghostty/themes" }
-"~/.config/git/config" = { source = "~/.dotfiles/.config/git/config" }
+"~/.config/git/dotfiles.gitconfig" = { source = "~/.dotfiles/.config/git/dotfiles.gitconfig" }
 "~/.config/git/ignore" = { source = "~/.dotfiles/.config/git/ignore" }
 "~/.config/mise/conf.d/dotfiles.toml" = { source = "~/.dotfiles/.config/mise/conf.d/dotfiles.toml" }
 "~/.config/mise/conf.d/tools.toml" = { source = "~/.dotfiles/.config/mise/conf.d/tools.toml" }

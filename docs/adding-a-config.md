@@ -74,6 +74,10 @@ The repo file should also configure this repo.
 
 A symlink lets the tool write straight into the repo. If that's unwanted, use
 `mode = "copy"`, or `mise dot track` to save the file's history in place.
+When other tools write the file too, as installers do with shell startup files
+and work tools with git's global config, make it a stub. Put the template in
+`stubs/` at its path relative to `~`, and have it include or source a tracked
+file. See [Stubs](config-locations.md#stubs).
 
 ### Replacing an existing config
 

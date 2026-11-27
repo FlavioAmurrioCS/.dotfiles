@@ -57,11 +57,10 @@ backup_stubs() {
     done
 }
 
-# zsh skips these once ~/.zshenv sets ZDOTDIR, and ~/.gitconfig overrides
-# ~/.config/git/config.
+# zsh skips these once ~/.zshenv sets ZDOTDIR.
 backup_shadowing() {
     local f
-    for f in .gitconfig .zshrc .zprofile .zlogin .zlogout; do
+    for f in .zshrc .zprofile .zlogin .zlogout; do
         if [[ -e "${HOME}/${f}" || -L "${HOME}/${f}" ]]; then backup "${HOME}/${f}"; fi
     done
 }
@@ -113,8 +112,13 @@ for f in .zshrc .zprofile .zlogin .zlogout; do
         echo "warning: zsh now skips ~/${f}; move what you need into ~/.config/zsh/${f}" >&2
     fi
 done
-if [[ -e "${HOME}/.gitconfig" || -L "${HOME}/.gitconfig" ]]; then
-    echo "warning: ~/.gitconfig overrides ~/.config/git/config; move what you need into ~/.config/git/config.local" >&2
+# The git stub, ~/.config/git/config, replaced config.local and doesn't read it.
+if [[ -e "${HOME}/.config/git/config.local" ]]; then
+    echo "warning: git no longer reads ~/.config/git/config.local; move what you need into ~/.config/git/config" >&2
+fi
+# `mise run stubs` keeps a git config the machine already had, without the include.
+if ! git config --file "${HOME}/.config/git/config" --get-all include.path 2>/dev/null | grep -q 'dotfiles\.gitconfig$'; then
+    echo "warning: ~/.config/git/config doesn't include ~/.config/git/dotfiles.gitconfig; add the [include] from ${DOTFILES}/stubs/.config/git/config" >&2
 fi
 
 if [[ -d "${BACKUP_DIR}" ]]; then
