@@ -372,14 +372,16 @@ Pattern: `~/.config/<tool>/config.toml`.
 - **Approvals:** `approvals.toml`, beside `config.toml`, records which project
   hooks you trusted. It's machine-local, so only `config.toml` is linked, not
   the directory.
-- **Schema:** worktrunk publishes none. The `#:schema` lines point at
-  [hand-written schemas][worktrunk-schemas] for each file, matching
-  `UserConfig` and `ProjectConfig` in v0.81.0. Both reject unknown keys, so
-  update them when a release adds one.
+- **Schema:** worktrunk publishes `user-config.json` and
+  `project-config.json` at `https://worktrunk.dev/schema/`, generated from
+  `UserConfig` and `ProjectConfig` since v0.83.0 ([#4726][worktrunk-4726]).
+  The `#:schema` lines point there. Both reject unknown keys, and leave out
+  the deprecated `pre-create` and `post-create` hooks, which wt still
+  accepts with a warning.
 - **This repo:** `.config/worktrunk/config.toml`, linked to the same path in
   `~`. No repo link. This repo's own project config is `.config/wt.toml`,
-  holding the commented starter from `wt config create --project`. worktrunk
-  is pinned in `conf.d/tools.toml`.
+  which contains only its `#:schema` line. worktrunk is pinned in
+  `conf.d/tools.toml`.
 - **Check:** `wt config show` prints the user and project files it found.
 - **Docs:** [user configuration in the worktrunk docs][worktrunk-docs].
 
@@ -533,7 +535,7 @@ with a plain file. So the startup files are owned by each machine:
 [rex-lua]: https://www.superlogical.com/rex/docs/reference/lua
 [worktrunk-docs]: https://github.com/max-sixty/worktrunk/blob/2c04fb3704275aab69237db0bc322e33b3775b6a/docs/src/content/docs/config.md?plain=1#L66-L75
 [worktrunk-path]: https://github.com/max-sixty/worktrunk/blob/2c04fb3704275aab69237db0bc322e33b3775b6a/src/config/user/path.rs#L104-L117
-[worktrunk-schemas]: https://gist.github.com/FlavioAmurrioCS/665fa9175d7bdd7cc0fe8ff8afb89e26
+[worktrunk-4726]: https://github.com/max-sixty/worktrunk/pull/4726
 [git-docs]: https://git-scm.com/docs/git-config/2.50.1#FILES
 [LazyVim starter]: https://github.com/LazyVim/starter/tree/803bc181d7c0d6d5eeba9274d9be49b287294d99
 [nvim-config]: https://github.com/neovim/neovim/blob/779c36969e31080503be2dfccbcc3f999e289606/runtime/doc/starting.txt?plain=1#L465-L472

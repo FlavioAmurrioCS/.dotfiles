@@ -1,4 +1,4 @@
-#:schema https://gist.githubusercontent.com/FlavioAmurrioCS/665fa9175d7bdd7cc0fe8ff8afb89e26/raw/worktrunk-config.schema.json
+#:schema https://worktrunk.dev/schema/user-config.json
 ################################################################################
 # Location Docs: https://worktrunk.dev/config/#user-configuration
 # Location User: ~/.config/worktrunk/config.toml
