@@ -126,8 +126,10 @@ Start from [`config-header-template.md`](config-header-template.md):
 
 1. Run `mise dot apply` and `mise run setup`, then `mise dot status -v`. Every
    entry should be `applied`.
+
 2. Run the `Location Check` command inside the repo and from a directory
    outside it.
+
 3. When the docs are unclear about macOS, test with a throwaway `HOME`. Put
    the config at one candidate path, change a setting with a visible effect,
    and run the tool with `HOME` pointing at the temp directory and

@@ -17,10 +17,10 @@ pin = true
 disable_backends = ["packslip"]
 
 [tools]
-fd = "10.5.0"
-fzf = "0.74.5"
-git-lfs = "3.8.1"
-neovim = "0.12.6"
-ripgrep = "15.2.0"
-tmux = "3.7c"
-worktrunk = { version = "0.81.0", workflow = "release.yaml" }
+fd = "latest"
+fzf = "latest"
+git-lfs = "latest"
+neovim = "latest"
+ripgrep = "latest"
+tmux = "latest"
+worktrunk = { version = "latest", workflow = "release.yaml" }
