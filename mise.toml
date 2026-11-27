@@ -47,11 +47,23 @@ done
 '''
 
 [tasks.stubs]
-description = "Create shell startup files from stubs/, skipping any that exist"
+description = "Create machine-owned files from stubs/, skipping any that exist"
+# A link into this repo is what the file was before it became a stub (git's
+# config was linked until it moved to dotfiles.gitconfig), so it's replaced.
 run = '''
 cd "{{config_root}}/stubs"
 find . -type f | while read -r f; do
   dst="$HOME/${f#./}"
+  if [ -L "$dst" ]; then
+    case "$(readlink "$dst")" in
+      "$HOME/.dotfiles/"* | "{{config_root}}/"*)
+        rm "$dst"
+        cp "$f" "$dst"
+        echo "replaced link $dst"
+        continue
+        ;;
+    esac
+  fi
   if [ -e "$dst" ] || [ -L "$dst" ]; then continue; fi
   mkdir -p "$(dirname "$dst")"
   cp "$f" "$dst"

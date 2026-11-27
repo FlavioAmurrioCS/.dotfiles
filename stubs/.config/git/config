@@ -1,0 +1,7 @@
+# git global config stub, created once by `mise run stubs` from ~/.dotfiles/stubs.
+# This copy is not tracked: the machine owns it, and `git config --global` and
+# work tools write here. Keys below the include win over the shared settings.
+# Move anything worth keeping on every machine into
+# ~/.dotfiles/.config/git/dotfiles.gitconfig.
+[include]
+  path = ~/.config/git/dotfiles.gitconfig

@@ -48,7 +48,7 @@ mise won't replace an existing file or folder with a link, so on a machine
 with its own configs the install stops at `mise dotfiles apply`. Run
 `bash install.sh --backup` to move those files into
 `~/.dotfiles-backup/<timestamp>/` first, at the same path relative to `~`.
-It moves the files that block a link, and each shell startup file that differs
+It moves the files that block a link, and each machine-owned file that differs
 from its template in `stubs/`. It also moves the files below. It prints each
 file it moves.
 
@@ -57,8 +57,11 @@ Without `--backup`, it warns about these files instead:
 - `~/.zshrc`, `~/.zprofile`, `~/.zlogin` and `~/.zlogout`: `~/.zshenv`
   points zsh at `~/.config/zsh`, so zsh skips them. Move what you need into
   the same file in `~/.config/zsh/`.
-- `~/.gitconfig`: git reads it after `~/.config/git/config`, and its keys win.
-  Move what you need into the untracked `~/.config/git/config.local`.
+
+Either way, it warns about `~/.config/git/config.local`, which git no longer
+reads. The untracked `~/.config/git/config` replaced it, so move what you
+need there. `~/.gitconfig` is fine to keep: git reads it last, and it's
+machine-owned too.
 
 ## How it works
 

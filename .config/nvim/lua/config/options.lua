@@ -5,6 +5,7 @@
 -- Config files Neovim doesn't recognise by name. VS Code and cmux read their
 -- settings as JSON with comments.
 vim.filetype.add({
+  extension = { gitconfig = "gitconfig" },
   filename = { shellcheckrc = "conf", [".shellcheckrc"] = "conf" },
   pattern = {
     [".*/%.vscode/.*%.json"] = "jsonc",

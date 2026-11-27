@@ -5,6 +5,7 @@ cmux
 dotfiles
 env
 fzf
+git's
 hushlogin
 keybind
 mise('s)?

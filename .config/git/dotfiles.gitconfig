@@ -1,9 +1,13 @@
 ################################################################################
 # Location Docs: https://git-scm.com/docs/git-config#FILES
-# Location User: ~/.config/git/config (~/.gitconfig must not exist, or it wins)
+# Location User: ~/.config/git/dotfiles.gitconfig (included by ~/.config/git/config)
 # Location Repo: none (per-repo settings live in each repo's .git/config)
-# Location Check: git config --global --list --show-origin
+# Location Check: git config --global --includes --list --show-origin
 ################################################################################
+# Settings shared by every machine. ~/.config/git/config is an untracked stub
+# from stubs/ that includes this file first, so `git config --global` writes
+# there, never here, and its keys win. ~/.gitconfig, if a tool creates one, is
+# read last and wins over both.
 
 [alias]
   l = log --relative-date --decorate --graph --abbrev-commit
@@ -40,7 +44,3 @@
 [user]
   name = Flavio Amurrio
   email = 25621374+FlavioAmurrioCS@users.noreply.github.com
-
-# Untracked, per machine (for example a work email). Last, so it wins.
-[include]
-  path = ~/.config/git/config.local
